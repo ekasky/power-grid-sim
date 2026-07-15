@@ -1,0 +1,21 @@
+FROM maven:3.9.16-eclipse-temurin-26 AS builder
+
+WORKDIR /powergrid-sim
+
+COPY pom.xml ./
+
+RUN mvn --batch-mode dependency:go-offline
+
+COPY src ./src
+
+RUN mvn --batch-mode package -DskipTests
+
+FROM eclipse-temurin:26-jre
+
+WORKDIR /powergrid-sim
+
+COPY --from=builder /powergrid-sim/target/*.jar sim.jar
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "sim.jar"]
