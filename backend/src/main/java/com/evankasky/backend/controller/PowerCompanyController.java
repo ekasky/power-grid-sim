@@ -2,6 +2,7 @@ package com.evankasky.backend.controller;
 
 import com.evankasky.backend.dto.powercompany.CreatePowerCompanyRequest;
 import com.evankasky.backend.dto.powercompany.PowerCompanyResponse;
+import com.evankasky.backend.dto.powercompany.UpdatePowerCompanyRequest;
 import com.evankasky.backend.mapper.PowerCompanyMapper;
 import com.evankasky.backend.model.PowerCompany;
 import com.evankasky.backend.service.PowerCompanyService;
@@ -64,6 +65,15 @@ public class PowerCompanyController {
             @RequestParam String shortName
     ) {
         PowerCompany powerCompany = powerCompanyService.findPowerCompanyByShortName(shortName);
+        return powerCompanyMapper.toResponse(powerCompany);
+    }
+
+    @PatchMapping("/{companyId}")
+    public PowerCompanyResponse updatePowerCompany(
+            @PathVariable UUID companyId,
+            @Valid @RequestBody UpdatePowerCompanyRequest request
+    ) {
+        PowerCompany powerCompany = powerCompanyService.updatePowerCompany(companyId, request);
         return powerCompanyMapper.toResponse(powerCompany);
     }
 
