@@ -10,8 +10,10 @@ import java.util.UUID;
 public interface PowerPlantRepo extends JpaRepository<PowerPlant, UUID> {
 
     boolean existsByCompany_IdAndPlantId(UUID companyId, String plantId);
+    boolean existsByCompany_IdAndPlantIdAndIdNot(UUID companyId, String plantId, UUID excludedPowerPlantId);
     List<PowerPlant> findAllByCompany_Id(UUID companyId);
     List<PowerPlant> findAllByCompany_ShortName(String shortName);
-    Optional<PowerPlant> findByCompany_IdAndPlantId(UUID companyId, String plantId);
+    Optional<PowerPlant> findByCompany_IdAndId(UUID companyId, UUID powerPlantId);
+    Optional<PowerPlant> findByIdAndCompany_Id(UUID powerPlantId, UUID companyId);
 
 }

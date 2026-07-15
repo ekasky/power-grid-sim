@@ -2,6 +2,7 @@ package com.evankasky.backend.controller;
 
 import com.evankasky.backend.dto.powerplant.CreatePowerPlantRequest;
 import com.evankasky.backend.dto.powerplant.PowerPlantResponse;
+import com.evankasky.backend.dto.powerplant.UpdatePowerPlantRequest;
 import com.evankasky.backend.mapper.PowerPlantMapper;
 import com.evankasky.backend.model.PowerPlant;
 import com.evankasky.backend.service.PowerPlantService;
@@ -58,6 +59,18 @@ public class PowerPlantController {
     ) {
 
         PowerPlant powerPlant = powerPlantService.createPowerPlant(companyId, request);
+        return powerPlantMapper.toResponse(powerPlant);
+
+    }
+
+    @PatchMapping("/companies/{companyId}/plants/{powerPlantId}")
+    public PowerPlantResponse updatePowerPlant(
+            @PathVariable UUID companyId,
+            @PathVariable UUID powerPlantId,
+            @Valid @RequestBody UpdatePowerPlantRequest request
+    ) {
+
+        PowerPlant powerPlant = powerPlantService.updatePowerPlant(companyId, powerPlantId, request);
         return powerPlantMapper.toResponse(powerPlant);
 
     }

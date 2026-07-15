@@ -1,8 +1,10 @@
 package com.evankasky.backend.service;
 
 import com.evankasky.backend.dto.powerplant.CreatePowerPlantRequest;
+import com.evankasky.backend.dto.powerplant.UpdatePowerPlantRequest;
 import com.evankasky.backend.exception.powercompany.PowerCompanyNotFoundException;
 import com.evankasky.backend.exception.powerplant.PowerPlantExistsException;
+import com.evankasky.backend.exception.powerplant.PowerPlantNotFoundException;
 import com.evankasky.backend.model.Location;
 import com.evankasky.backend.model.PowerCompany;
 import com.evankasky.backend.model.PowerPlant;
@@ -80,6 +82,51 @@ public class PowerPlantService {
 
         powerCompany.addPowerPlant(powerPlant);
         return powerPlantRepo.save(powerPlant);
+
+    }
+
+    @Transactional
+    public PowerPlant updatePowerPlant(
+            UUID companyId,
+            UUID powerPlantId,
+            UpdatePowerPlantRequest request
+    ) {
+
+        PowerPlant powerPlant = powerPlantRepo.findByCompany_IdAndId(companyId, powerPlantId)
+                .orElseThrow(() -> new PowerPlantNotFoundException(
+                        "Power plant '" + powerPlantId + "' was not found for company '" + companyId + "'."
+        ));
+
+        if(request.plantId() != null) {
+
+           String plantId = request.plantId().trim();
+
+           if(powerPlantRepo.existsByCompany_IdAndPlantIdAndIdNot(companyId, plantId, powerPlantId)) {
+               throw new PowerPlantExistsException(
+                       "Power plant ID '" + plantId + "' is already used by another plant in this company"
+               );
+           }
+
+           powerPlant.setPlantId(plantId);
+
+        }
+
+        if(request.initialBuildCost() != null) {
+            powerPlant.setInitialBuildCost(request.initialBuildCost());
+        }
+
+        if(request.recurringGenerationCost() != null) {
+            powerPlant.setRecurringGenerationCost(request.recurringGenerationCost());
+        }
+
+        if(request.location() != null) {
+
+            Location location = new Location(request.location().x(), request.location().y());
+            powerPlant.setLocation(location);
+
+        }
+
+        return powerPlant;
 
     }
 
