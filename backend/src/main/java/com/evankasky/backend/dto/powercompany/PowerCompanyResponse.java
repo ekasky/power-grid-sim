@@ -8,8 +8,8 @@ import java.util.UUID;
 public record PowerCompanyResponse(
 
         UUID id,
-        String longName,
         String shortName,
+        String longName,
         BigDecimal standardRate,
         BigDecimal totalRevenue,
         BigDecimal totalCosts,

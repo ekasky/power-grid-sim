@@ -16,8 +16,8 @@ public class PowerCompanyMapper {
 
         return new PowerCompanyResponse(
                 powerCompany.getId(),
-                powerCompany.getLongName(),
                 powerCompany.getShortName(),
+                powerCompany.getLongName(),
                 powerCompany.getStandardRate(),
                 powerCompany.getTotalRevenue(),
                 powerCompany.getTotalCosts(),

@@ -45,9 +45,9 @@ public class PowerCompany {
 
     protected PowerCompany() { }
 
-    public PowerCompany(String longName, String shortName, BigDecimal standardRate, Location location) {
-        this.longName = longName;
+    public PowerCompany(String shortName, String longName, BigDecimal standardRate, Location location) {
         this.shortName = shortName;
+        this.longName = longName;
         this.standardRate = standardRate;
         this.location = location;
     }
