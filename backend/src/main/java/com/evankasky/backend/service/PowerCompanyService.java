@@ -2,6 +2,7 @@ package com.evankasky.backend.service;
 
 import com.evankasky.backend.dto.powercompany.CreatePowerCompanyRequest;
 import com.evankasky.backend.exception.powercompany.PowerCompanyExistsException;
+import com.evankasky.backend.model.Location;
 import com.evankasky.backend.model.PowerCompany;
 import com.evankasky.backend.repository.PowerCompanyRepo;
 import jakarta.transaction.Transactional;
@@ -35,7 +36,17 @@ public class PowerCompanyService {
             );
         }
 
-        PowerCompany powerCompany = new PowerCompany(request.shortName(), request.longName(), request.standardRate());
+        Location location = new Location(
+                request.location().x(),
+                request.location().y()
+        );
+
+        PowerCompany powerCompany = new PowerCompany(
+                request.shortName(),
+                request.longName(),
+                request.standardRate(),
+                location
+        );
 
         return powerCompanyRepo.save(powerCompany);
 

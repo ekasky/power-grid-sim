@@ -45,10 +45,11 @@ public class PowerCompany {
 
     protected PowerCompany() { }
 
-    public PowerCompany(String longName, String shortName, BigDecimal standardRate) {
+    public PowerCompany(String longName, String shortName, BigDecimal standardRate, Location location) {
         this.longName = longName;
         this.shortName = shortName;
         this.standardRate = standardRate;
+        this.location = location;
     }
 
     /* *****************************************************************************************************************
@@ -68,6 +69,10 @@ public class PowerCompany {
     /* *****************************************************************************************************************
     *                                               Getters and Setters
     * *****************************************************************************************************************/
+
+    public UUID getId() {
+        return id;
+    }
 
     public void setLongName(String longName) {
         this.longName = longName;
