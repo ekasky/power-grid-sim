@@ -9,6 +9,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/companies")
 public class PowerCompanyController {
@@ -28,6 +30,16 @@ public class PowerCompanyController {
     /* *****************************************************************************************************************
      *                                      Power Company Controller Methods
      ***************************************************************************************************************** */
+
+    @GetMapping
+    public List<PowerCompanyResponse> getAllPowerCompanies() {
+        return powerCompanyService
+                .getAllPowerCompanies()
+                .stream()
+                .map(powerCompanyMapper::toResponse)
+                .toList();
+
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

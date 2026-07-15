@@ -5,8 +5,10 @@ import com.evankasky.backend.exception.powercompany.PowerCompanyExistsException;
 import com.evankasky.backend.model.Location;
 import com.evankasky.backend.model.PowerCompany;
 import com.evankasky.backend.repository.PowerCompanyRepo;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class PowerCompanyService {
@@ -24,6 +26,11 @@ public class PowerCompanyService {
     /* *****************************************************************************************************************
      *                                        Power Company Service Methods
      ***************************************************************************************************************** */
+
+    @Transactional(readOnly = true)
+    public List<PowerCompany> getAllPowerCompanies() {
+        return powerCompanyRepo.findAll();
+    }
 
     @Transactional
     public PowerCompany createPowerCompany(CreatePowerCompanyRequest request) {
