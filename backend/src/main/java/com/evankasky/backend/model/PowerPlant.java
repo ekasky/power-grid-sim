@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -41,6 +43,9 @@ public class PowerPlant {
     @JoinColumn(name = "company_id", nullable = false)
     private PowerCompany company;
 
+    @OneToMany(mappedBy = "powerPlant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PowerSubstation> powerSubstations = new ArrayList<>();
+
     /* *****************************************************************************************************************
      *                                                  Constructors
      ***************************************************************************************************************** */
@@ -57,7 +62,19 @@ public class PowerPlant {
      *                                            Power Plant Methods
      ***************************************************************************************************************** */
 
+    public void addPowerSubstation(PowerSubstation powerSubstation) {
+        powerSubstations.add(powerSubstation);
+        powerSubstation.setPowerPlant(this);
+    }
 
+    public void deletePowerSubstation(PowerSubstation powerSubstation) {
+        powerSubstations.remove(powerSubstation);
+        powerSubstation.setPowerPlant(null);
+    }
+
+    public List<PowerSubstation> getPowerSubstations() {
+        return List.copyOf(powerSubstations);
+    }
 
     /* *****************************************************************************************************************
      *                                               Getters and Setters
