@@ -52,10 +52,11 @@ public class PowerPlant {
 
     protected PowerPlant() { }
 
-    public PowerPlant(String plantId, BigDecimal initialBuildCost, BigDecimal recurringGenerationCost) {
+    public PowerPlant(String plantId, BigDecimal initialBuildCost, BigDecimal recurringGenerationCost, Location location) {
         this.plantId = plantId;
         this.initialBuildCost = initialBuildCost;
         this.recurringGenerationCost = recurringGenerationCost;
+        this.location = location;
     }
 
     /* *****************************************************************************************************************

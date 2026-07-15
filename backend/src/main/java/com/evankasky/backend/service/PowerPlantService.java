@@ -1,6 +1,10 @@
 package com.evankasky.backend.service;
 
+import com.evankasky.backend.dto.powerplant.CreatePowerPlantRequest;
 import com.evankasky.backend.exception.powercompany.PowerCompanyNotFoundException;
+import com.evankasky.backend.exception.powerplant.PowerPlantExistsException;
+import com.evankasky.backend.model.Location;
+import com.evankasky.backend.model.PowerCompany;
 import com.evankasky.backend.model.PowerPlant;
 import com.evankasky.backend.repository.PowerCompanyRepo;
 import com.evankasky.backend.repository.PowerPlantRepo;
@@ -45,7 +49,39 @@ public class PowerPlantService {
 
     }
 
+    @Transactional
+    public PowerPlant createPowerPlant(
+            UUID companyId,
+            CreatePowerPlantRequest request
+    ) {
 
+        PowerCompany powerCompany = powerCompanyRepo.findById(companyId)
+                .orElseThrow(() -> new PowerCompanyNotFoundException("Power company not found: " + companyId)
+        );
+
+        String plantId = request.plantId().trim();
+
+        if(powerPlantRepo.existsByCompany_IdAndPlantId(companyId, plantId)) {
+            throw new PowerPlantExistsException(
+                    "Power plant '" + plantId +
+                            "' already exists for company '" +
+                            companyId + "'."
+            );
+        }
+
+        Location location = new Location(request.location().x(), request.location().y());
+
+        PowerPlant powerPlant = new PowerPlant(
+                plantId,
+                request.initialBuildCost(),
+                request.recurringGenerationCost(),
+                location
+        );
+
+        powerCompany.addPowerPlant(powerPlant);
+        return powerPlantRepo.save(powerPlant);
+
+    }
 
     /* *****************************************************************************************************************
      *                                              Helper Methods
