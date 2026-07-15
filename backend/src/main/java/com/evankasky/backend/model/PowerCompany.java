@@ -125,4 +125,8 @@ public class PowerCompany {
     public List<PowerPlant> getPowerPlants() {
         return powerPlants;
     }
+
+    public int getPowerPlantCount() {
+        return powerPlants.size();
+    }
 }

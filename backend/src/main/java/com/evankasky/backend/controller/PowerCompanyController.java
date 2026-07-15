@@ -77,4 +77,12 @@ public class PowerCompanyController {
         return powerCompanyMapper.toResponse(powerCompany);
     }
 
+    @DeleteMapping("/{companyId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePowerCompanyById(
+            @PathVariable UUID companyId
+    ) {
+        powerCompanyService.deletePowerCompanyById(companyId);
+    }
+
 }

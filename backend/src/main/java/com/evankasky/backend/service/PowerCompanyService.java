@@ -2,6 +2,7 @@ package com.evankasky.backend.service;
 
 import com.evankasky.backend.dto.powercompany.CreatePowerCompanyRequest;
 import com.evankasky.backend.dto.powercompany.UpdatePowerCompanyRequest;
+import com.evankasky.backend.exception.PowerGridSimulationLogicalException;
 import com.evankasky.backend.exception.powercompany.PowerCompanyExistsException;
 import com.evankasky.backend.exception.powercompany.PowerCompanyNotFoundException;
 import com.evankasky.backend.model.Location;
@@ -125,6 +126,19 @@ public class PowerCompanyService {
         }
 
         return powerCompany;
+
+    }
+
+    @Transactional
+    public void deletePowerCompanyById(UUID companyId) {
+        PowerCompany powerCompany = powerCompanyRepo.findById(companyId)
+                .orElseThrow(() -> new PowerCompanyNotFoundException("Power company not found: " + companyId));
+
+        if(powerCompany.getPowerPlantCount() > 0) {
+            throw new PowerGridSimulationLogicalException("Cannot delete a power company that owns power plants.");
+        }
+
+        powerCompanyRepo.delete(powerCompany);
 
     }
 
