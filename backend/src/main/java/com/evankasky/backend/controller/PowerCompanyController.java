@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/companies")
@@ -50,5 +51,20 @@ public class PowerCompanyController {
         return powerCompanyMapper.toResponse(powerCompany);
     }
 
+    @GetMapping("/{companyId}")
+    public PowerCompanyResponse getPowerCompanyById(
+            @PathVariable UUID companyId
+    ) {
+        PowerCompany powerCompany = powerCompanyService.findPowerCompanyById(companyId);
+        return powerCompanyMapper.toResponse(powerCompany);
+    }
+
+    @GetMapping(params = "shortName")
+    public PowerCompanyResponse getPowerCompanyByShortName(
+            @RequestParam String shortName
+    ) {
+        PowerCompany powerCompany = powerCompanyService.findPowerCompanyByShortName(shortName);
+        return powerCompanyMapper.toResponse(powerCompany);
+    }
 
 }

@@ -2,6 +2,7 @@ package com.evankasky.backend.service;
 
 import com.evankasky.backend.dto.powercompany.CreatePowerCompanyRequest;
 import com.evankasky.backend.exception.powercompany.PowerCompanyExistsException;
+import com.evankasky.backend.exception.powercompany.PowerCompanyNotFoundException;
 import com.evankasky.backend.model.Location;
 import com.evankasky.backend.model.PowerCompany;
 import com.evankasky.backend.repository.PowerCompanyRepo;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class PowerCompanyService {
@@ -56,6 +58,26 @@ public class PowerCompanyService {
         );
 
         return powerCompanyRepo.save(powerCompany);
+
+    }
+
+    @Transactional(readOnly = true)
+    public PowerCompany findPowerCompanyById(UUID companyId) {
+
+        return powerCompanyRepo.findById(companyId)
+                .orElseThrow(() -> new PowerCompanyNotFoundException(
+                        "Power company not found: " + companyId
+        ));
+
+    }
+
+    @Transactional(readOnly = true)
+    public PowerCompany findPowerCompanyByShortName(String shortName) {
+
+        return powerCompanyRepo.findByShortName(shortName)
+                .orElseThrow(() -> new PowerCompanyNotFoundException(
+                   "Power company not found: " + shortName
+                ));
 
     }
 
