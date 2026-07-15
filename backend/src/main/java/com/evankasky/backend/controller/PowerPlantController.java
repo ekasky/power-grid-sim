@@ -7,6 +7,7 @@ import com.evankasky.backend.mapper.PowerPlantMapper;
 import com.evankasky.backend.model.PowerPlant;
 import com.evankasky.backend.service.PowerPlantService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -73,6 +74,15 @@ public class PowerPlantController {
         PowerPlant powerPlant = powerPlantService.updatePowerPlant(companyId, powerPlantId, request);
         return powerPlantMapper.toResponse(powerPlant);
 
+    }
+
+    @DeleteMapping("/companies/{companyId}/plants/{powerPlantId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePowerPlant(
+            @PathVariable UUID companyId,
+            @PathVariable UUID powerPlantId
+    ) {
+        powerPlantService.deletePowerPlant(companyId, powerPlantId);
     }
 
 }
