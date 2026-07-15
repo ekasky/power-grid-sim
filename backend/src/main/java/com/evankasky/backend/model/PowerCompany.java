@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -34,6 +36,9 @@ public class PowerCompany {
     @Embedded
     private Location location;
 
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PowerPlant> powerPlants = new ArrayList<>();
+
     /* *****************************************************************************************************************
      *                                                  Constructors
      ***************************************************************************************************************** */
@@ -50,7 +55,15 @@ public class PowerCompany {
      *                                             Power Company Methods
      ***************************************************************************************************************** */
 
-    
+    public void addPowerPlant(PowerPlant powerPlant) {
+        powerPlants.add(powerPlant);
+        powerPlant.setCompany(this);
+    }
+
+    public void deletePowerPlant(PowerPlant powerPlant) {
+        powerPlants.remove(powerPlant);
+        powerPlant.setCompany(null);
+    }
 
     /* *****************************************************************************************************************
     *                                               Getters and Setters
@@ -102,5 +115,9 @@ public class PowerCompany {
 
     public Location getLocation() {
         return location;
+    }
+
+    public List<PowerPlant> getPowerPlants() {
+        return powerPlants;
     }
 }
