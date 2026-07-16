@@ -17,6 +17,8 @@ public class PowerPlantMapper {
         return new PowerPlantResponse(
                 powerPlant.getId(),
                 powerPlant.getPlantId(),
+                powerPlant.getCompany().getId(),
+                powerPlant.getCompany().getShortName(),
                 powerPlant.getInitialBuildCost(),
                 powerPlant.getRecurringGenerationCost(),
                 powerPlant.getPowerProduced(),

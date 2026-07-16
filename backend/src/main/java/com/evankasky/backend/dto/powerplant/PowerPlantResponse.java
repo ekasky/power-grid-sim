@@ -9,6 +9,8 @@ public record PowerPlantResponse(
 
         UUID id,
         String plantId,
+        UUID companyId,
+        String powerPlantShortName,
         BigDecimal initialBuildCost,
         BigDecimal recurringGenerationCost,
         BigDecimal powerProduced,
