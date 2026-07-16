@@ -1,6 +1,8 @@
 package com.evankasky.backend.service;
 
 import com.evankasky.backend.exception.powercompany.PowerCompanyNotFoundException;
+import com.evankasky.backend.exception.powerplant.PowerPlantNotFoundException;
+import com.evankasky.backend.exception.powersubstation.PowerSubstationNotFoundException;
 import com.evankasky.backend.model.Transformer;
 import com.evankasky.backend.repository.PowerCompanyRepo;
 import com.evankasky.backend.repository.PowerPlantRepo;
@@ -45,7 +47,7 @@ public class TransformerService {
         return transformerRepo.findAll();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Transformer> getAllPowerCompaniesTransformers(UUID companyId) {
 
         if(!powerCompanyRepo.existsById(companyId)) {
@@ -53,6 +55,45 @@ public class TransformerService {
         }
 
         return transformerRepo.findAllByPowerSubstation_PowerPlant_Company_Id(companyId);
+
+    }
+
+    @Transactional(readOnly = true)
+    public List<Transformer> getAllPowerPlantsTransformers(
+            UUID companyId,
+            UUID powerPlantId
+    ) {
+
+        powerPlantRepo.findByCompany_IdAndId(companyId, powerPlantId)
+                .orElseThrow(()-> new PowerPlantNotFoundException(
+                        "Power plant '" + powerPlantId + "' not found for company '" +
+                                companyId + "'"
+        ));
+
+        return transformerRepo.findAllByPowerSubstation_PowerPlant_Id(powerPlantId);
+
+    }
+
+    @Transactional(readOnly = true)
+    public List<Transformer> getAllPowerSubstationTransformers(
+            UUID companyId,
+            UUID powerPlantId,
+            UUID powerSubstationId
+    ) {
+
+        powerPlantRepo.findByCompany_IdAndId(companyId, powerPlantId)
+                .orElseThrow(()-> new PowerPlantNotFoundException(
+                        "Power plant '" + powerPlantId + "' not found for company '" +
+                                companyId + "'"
+        ));
+
+        powerSubstationRepo.findByIdAndPowerPlant_Id(powerSubstationId, powerPlantId)
+                .orElseThrow(() -> new PowerSubstationNotFoundException(
+                        "Power substation '" + powerSubstationId + "' not found for power plant '" +
+                                powerPlantId + "'"
+        ));
+
+        return transformerRepo.findAllByPowerSubstation_Id(powerSubstationId);
 
     }
 

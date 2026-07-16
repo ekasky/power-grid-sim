@@ -15,5 +15,7 @@ public interface TransformerRepo extends JpaRepository<Transformer, UUID> {
     Optional<Transformer> findByIdAndPowerSubstation_Id(UUID transformerId, UUID powerSubstationId);
     Optional<Transformer> findByPowerSubstation_IdAndTransformerId(UUID powerSubstationId, String transformerId);
     List<Transformer> findAllByPowerSubstation_PowerPlant_Company_Id(UUID companyId);
+    List<Transformer> findAllByPowerSubstation_PowerPlant_Id(UUID powerPlantId);
+
 
 }

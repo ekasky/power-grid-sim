@@ -49,4 +49,27 @@ public class TransformerController {
                 .toList();
     }
 
+    @GetMapping("/companies/{companyId}/plants/{powerPlantId}/transformers")
+    public List<TransformerResponse> getAllPowerPlantsTransformers(
+            @PathVariable UUID companyId,
+            @PathVariable UUID powerPlantId
+    ) {
+        return transformerService.getAllPowerPlantsTransformers(companyId, powerPlantId)
+                .stream()
+                .map(transformerMapper::toResponse)
+                .toList();
+    }
+
+    @GetMapping("/companies/{companyId}/plants/{powerPlantId}/substations/{powerSubstationId}/transformers")
+    public List<TransformerResponse> getAllPowerSubstationsTransformers(
+            @PathVariable UUID companyId,
+            @PathVariable UUID powerPlantId,
+            @PathVariable UUID powerSubstationId
+    ) {
+        return transformerService.getAllPowerSubstationTransformers(companyId, powerPlantId, powerSubstationId)
+                .stream()
+                .map(transformerMapper::toResponse)
+                .toList();
+    }
+
 }
