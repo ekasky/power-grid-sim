@@ -2,6 +2,7 @@ package com.evankasky.backend.controller;
 
 import com.evankasky.backend.dto.transformer.CreateTransformerRequest;
 import com.evankasky.backend.dto.transformer.TransformerResponse;
+import com.evankasky.backend.dto.transformer.UpdateTransformerRequest;
 import com.evankasky.backend.mapper.TransformerMapper;
 import com.evankasky.backend.model.Transformer;
 import com.evankasky.backend.service.TransformerService;
@@ -103,6 +104,27 @@ public class TransformerController {
     ) {
 
         Transformer transformer = transformerService.createTransformer(companyId, powerPlantId, powerSubstationId, request);
+        return transformerMapper.toResponse(transformer);
+
+    }
+
+    @PatchMapping("/companies/{companyId}/plants/{powerPlantId}/substations/{powerSubstationId}/transformers/{transformerId}")
+    public TransformerResponse updateTransformer(
+            @PathVariable UUID companyId,
+            @PathVariable UUID powerPlantId,
+            @PathVariable UUID powerSubstationId,
+            @PathVariable UUID transformerId,
+            @Valid @RequestBody UpdateTransformerRequest request
+    ) {
+
+        Transformer transformer = transformerService.updateTransformer(
+                companyId,
+                powerPlantId,
+                powerSubstationId,
+                transformerId,
+                request
+        );
+
         return transformerMapper.toResponse(transformer);
 
     }

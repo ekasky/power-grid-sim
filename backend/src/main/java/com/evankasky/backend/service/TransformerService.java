@@ -1,6 +1,7 @@
 package com.evankasky.backend.service;
 
 import com.evankasky.backend.dto.transformer.CreateTransformerRequest;
+import com.evankasky.backend.dto.transformer.UpdateTransformerRequest;
 import com.evankasky.backend.exception.powercompany.PowerCompanyNotFoundException;
 import com.evankasky.backend.exception.powerplant.PowerPlantNotFoundException;
 import com.evankasky.backend.exception.powersubstation.PowerSubstationNotFoundException;
@@ -173,6 +174,70 @@ public class TransformerService {
         powerSubstation.addTransformer(transformer);
         return transformerRepo.save(transformer);
 
+    }
+
+    @Transactional
+    public Transformer updateTransformer(
+            UUID companyId,
+            UUID powerPlantId,
+            UUID powerSubstationId,
+            UUID transformerId,
+            UpdateTransformerRequest request
+    ) {
+
+        powerPlantRepo.findByCompany_IdAndId(companyId, powerPlantId)
+                .orElseThrow(() -> new PowerPlantNotFoundException(
+                        "Power plant '" + powerPlantId + "' not found for company '" + companyId + "'")
+        );
+
+        powerSubstationRepo.findByIdAndPowerPlant_Id(powerSubstationId, powerPlantId)
+                .orElseThrow(() -> new PowerSubstationNotFoundException(
+                        "Power substation '" + powerSubstationId + "' not found for power plant '" + powerPlantId + "'")
+        );
+
+        Transformer transformer = transformerRepo.findByIdAndPowerSubstation_Id(transformerId, powerSubstationId)
+                .orElseThrow(() -> new TransformerNotFoundException(
+                        "Transformer '" + transformerId + "' not found for power substation '" + powerSubstationId + "'")
+        );
+
+        if (request.transformerId() != null) {
+            String newTransformerId = request.transformerId().trim();
+
+            boolean transformerIdExists = transformerRepo.existsByPowerSubstation_IdAndTransformerIdAndIdNot(
+                    powerSubstationId,
+                    newTransformerId,
+                    transformerId
+            );
+
+            if (transformerIdExists) {
+                throw new TransformerExistsException(
+                        "Transformer ID '" + newTransformerId + "' is already used by another transformer " +
+                                "in power substation '" + powerSubstationId + "'"
+                );
+            }
+
+            transformer.setTransformerId(newTransformerId);
+        }
+
+        if (request.initialInstallationCost() != null) {
+            transformer.setInitialInstallationCost(
+                    request.initialInstallationCost()
+            );
+        }
+
+        if (request.recurringMaintenanceCost() != null) {
+            transformer.setRecurringMaintenanceCost(
+                    request.recurringMaintenanceCost()
+            );
+        }
+
+        if (request.location() != null) {
+            transformer.setLocation(
+                    new Location(request.location().x(), request.location().y())
+            );
+        }
+
+        return transformer;
     }
 
     /* *****************************************************************************************************************
