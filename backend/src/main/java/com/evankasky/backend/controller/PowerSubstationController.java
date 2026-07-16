@@ -2,6 +2,7 @@ package com.evankasky.backend.controller;
 
 import com.evankasky.backend.dto.powersubstation.CreatePowerSubstationRequest;
 import com.evankasky.backend.dto.powersubstation.PowerSubstationResponse;
+import com.evankasky.backend.dto.powersubstation.UpdatePowerSubstationRequest;
 import com.evankasky.backend.mapper.PowerSubstationMapper;
 import com.evankasky.backend.model.PowerSubstation;
 import com.evankasky.backend.service.PowerSubstationService;
@@ -74,6 +75,25 @@ public class PowerSubstationController {
     ) {
         PowerSubstation powerSubstation = powerSubstationService.createSubstation(companyId, powerPlantId, request);
         return powerSubstationMapper.toResponse(powerSubstation);
+    }
+
+    @PatchMapping("/companies/{companyId}/plants/{powerPlantId}/substations/{powerSubstationId}")
+    public PowerSubstationResponse updatePowerSubstation(
+            @PathVariable UUID companyId,
+            @PathVariable UUID powerPlantId,
+            @PathVariable UUID powerSubstationId,
+            @Valid @RequestBody UpdatePowerSubstationRequest request
+    ) {
+
+        PowerSubstation powerSubstation = powerSubstationService.updatePowerSubstation(
+                companyId,
+                powerPlantId,
+                powerSubstationId,
+                request
+        );
+
+        return powerSubstationMapper.toResponse(powerSubstation);
+
     }
 
 }

@@ -2,9 +2,11 @@ package com.evankasky.backend.service;
 
 import com.evankasky.backend.dto.powersubstation.CreatePowerSubstationRequest;
 import com.evankasky.backend.dto.powersubstation.PowerSubstationResponse;
+import com.evankasky.backend.dto.powersubstation.UpdatePowerSubstationRequest;
 import com.evankasky.backend.exception.powercompany.PowerCompanyNotFoundException;
 import com.evankasky.backend.exception.powerplant.PowerPlantNotFoundException;
 import com.evankasky.backend.exception.powersubstation.PowerSubstationExistsException;
+import com.evankasky.backend.exception.powersubstation.PowerSubstationNotFoundException;
 import com.evankasky.backend.model.Location;
 import com.evankasky.backend.model.PowerPlant;
 import com.evankasky.backend.model.PowerSubstation;
@@ -108,6 +110,64 @@ public class PowerSubstationService {
 
         powerPlant.addPowerSubstation(powerSubstation);
         return powerSubstationRepo.save(powerSubstation);
+
+    }
+
+    @Transactional
+    public PowerSubstation updatePowerSubstation(
+            UUID companyId,
+            UUID powerPlantId,
+            UUID powerSubstationId,
+            UpdatePowerSubstationRequest request
+    ) {
+
+        if(!powerCompanyRepo.existsById(companyId)) {
+            throw new PowerCompanyNotFoundException("Power company not found: " + companyId);
+        }
+
+        powerPlantRepo.findByCompany_IdAndId(companyId, powerPlantId)
+                .orElseThrow(() -> new PowerPlantNotFoundException(
+                        "Power plant '" + powerPlantId + "' was not found for company '" +
+                                companyId + "'"
+        ));
+
+        PowerSubstation powerSubstation = powerSubstationRepo.findByIdAndPowerPlant_Id(powerSubstationId, powerPlantId)
+                .orElseThrow(() -> new PowerSubstationNotFoundException(
+                        "Power substation '" + powerSubstationId + "' was not found for power plant '" +
+                                powerPlantId + "'"
+        ));
+
+        if(request.substationId() != null) {
+
+            String substationId = request.substationId().trim();
+
+            if(powerSubstationRepo.existsByPowerPlant_IdAndSubstationIdAndIdNot(powerPlantId, substationId, powerSubstationId)) {
+                throw new PowerSubstationExistsException(
+                        "Power substation ID '" +
+                                powerSubstationId + "' is already used by another substation for this power plant"
+                );
+            }
+
+            powerSubstation.setSubstationId(substationId);
+
+        }
+
+        if(request.initialInstallationCost() != null) {
+            powerSubstation.setInitialInstallationCost(request.initialInstallationCost());
+        }
+
+        if(request.recurringMaintenanceCost() != null) {
+            powerSubstation.setRecurringMaintenanceCost(request.recurringMaintenanceCost());
+        }
+
+        if(request.location() != null) {
+
+            Location location = new Location(request.location().x(), request.location().y());
+            powerSubstation.setLocation(location);
+
+        }
+
+        return powerSubstation;
 
     }
 
