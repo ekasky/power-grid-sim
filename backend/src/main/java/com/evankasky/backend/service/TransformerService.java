@@ -3,6 +3,7 @@ package com.evankasky.backend.service;
 import com.evankasky.backend.exception.powercompany.PowerCompanyNotFoundException;
 import com.evankasky.backend.exception.powerplant.PowerPlantNotFoundException;
 import com.evankasky.backend.exception.powersubstation.PowerSubstationNotFoundException;
+import com.evankasky.backend.exception.transformer.TransformerNotFoundException;
 import com.evankasky.backend.model.Transformer;
 import com.evankasky.backend.repository.PowerCompanyRepo;
 import com.evankasky.backend.repository.PowerPlantRepo;
@@ -94,6 +95,31 @@ public class TransformerService {
         ));
 
         return transformerRepo.findAllByPowerSubstation_Id(powerSubstationId);
+
+    }
+
+    @Transactional(readOnly = true)
+    public Transformer getTransformerByTransformerId(
+            UUID companyId,
+            UUID powerPlantId,
+            UUID powerSubstationId,
+            String transformerId
+    ) {
+
+        powerPlantRepo.findByCompany_IdAndId(companyId, powerPlantId)
+                .orElseThrow(() -> new PowerPlantNotFoundException("Power plant '" + powerPlantId +
+                        "' was not found for company '" + companyId + "'.")
+        );
+
+        powerSubstationRepo.findByIdAndPowerPlant_Id(powerSubstationId, powerPlantId)
+                .orElseThrow(() -> new PowerSubstationNotFoundException("Power substation '" + powerSubstationId +
+                        "' was not found for power plant '" + powerPlantId + "'.")
+        );
+
+        return transformerRepo.findByPowerSubstation_IdAndTransformerId(powerSubstationId, transformerId.trim())
+                .orElseThrow(() -> new TransformerNotFoundException("Transformer '" + transformerId +
+                        "' was not found for substation '" + powerSubstationId + "'.")
+        );
 
     }
 

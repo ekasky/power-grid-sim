@@ -2,11 +2,9 @@ package com.evankasky.backend.controller;
 
 import com.evankasky.backend.dto.transformer.TransformerResponse;
 import com.evankasky.backend.mapper.TransformerMapper;
+import com.evankasky.backend.model.Transformer;
 import com.evankasky.backend.service.TransformerService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -70,6 +68,26 @@ public class TransformerController {
                 .stream()
                 .map(transformerMapper::toResponse)
                 .toList();
+    }
+
+    @GetMapping(
+            value = "/companies/{companyId}/plants/{powerPlantId}/substations/{powerSubstationId}/transformers",
+            params = "transformerId"
+    )
+    public TransformerResponse getTransformerByTransformerId(
+            @PathVariable UUID companyId,
+            @PathVariable UUID powerPlantId,
+            @PathVariable UUID powerSubstationId,
+            @RequestParam String transformerId
+    ) {
+        Transformer transformer = transformerService.getTransformerByTransformerId(
+                companyId,
+                powerPlantId,
+                powerSubstationId,
+                transformerId
+        );
+
+        return transformerMapper.toResponse(transformer);
     }
 
 }

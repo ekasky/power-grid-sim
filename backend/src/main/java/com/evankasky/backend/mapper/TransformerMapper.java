@@ -4,7 +4,9 @@ import com.evankasky.backend.dto.location.LocationResponse;
 import com.evankasky.backend.dto.transformer.TransformerResponse;
 import com.evankasky.backend.model.Location;
 import com.evankasky.backend.model.Transformer;
+import org.springframework.stereotype.Component;
 
+@Component
 public class TransformerMapper {
 
     public TransformerResponse toResponse(Transformer transformer) {
