@@ -9,6 +9,12 @@ public record TransformerResponse(
 
         UUID id,
         String transformerId,
+        UUID powerCompanyId,
+        String powerCompanyShortName,
+        UUID powerPlantId,
+        String plantId,
+        UUID powerSubstationId,
+        String substationId,
         BigDecimal initialInstallationCost,
         BigDecimal recurringMaintenanceCost,
         LocationResponse location

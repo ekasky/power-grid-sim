@@ -17,6 +17,12 @@ public class TransformerMapper {
         return new TransformerResponse(
                 transformer.getId(),
                 transformer.getTransformerId(),
+                transformer.getPowerSubstation().getPowerPlant().getCompany().getId(),
+                transformer.getPowerSubstation().getPowerPlant().getCompany().getShortName(),
+                transformer.getPowerSubstation().getPowerPlant().getId(),
+                transformer.getPowerSubstation().getPowerPlant().getPlantId(),
+                transformer.getPowerSubstation().getId(),
+                transformer.getPowerSubstation().getSubstationId(),
                 transformer.getInitialInstallationCost(),
                 transformer.getRecurringMaintenanceCost(),
                 locationResponse
