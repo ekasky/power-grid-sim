@@ -17,7 +17,7 @@ public class PowerSubstationMapper {
         return new PowerSubstationResponse(
                 powerSubstation.getId(),
                 powerSubstation.getSubstationId(),
-                powerSubstation.getInitialBuildCost(),
+                powerSubstation.getInitialInstallationCost(),
                 powerSubstation.getRecurringMaintenanceCost(),
                 locationResponse
         );

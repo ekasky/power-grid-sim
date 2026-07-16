@@ -1,12 +1,13 @@
 package com.evankasky.backend.controller;
 
+import com.evankasky.backend.dto.powersubstation.CreatePowerSubstationRequest;
 import com.evankasky.backend.dto.powersubstation.PowerSubstationResponse;
 import com.evankasky.backend.mapper.PowerSubstationMapper;
+import com.evankasky.backend.model.PowerSubstation;
 import com.evankasky.backend.service.PowerSubstationService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -39,7 +40,7 @@ public class PowerSubstationController {
                 .toList();
     }
 
-    @GetMapping("/companies/{companyId}")
+    @GetMapping("/companies/{companyId}/substations")
     public List<PowerSubstationResponse> getAllCompaniesSubstations(
             @PathVariable UUID companyId
     ) {
@@ -51,7 +52,7 @@ public class PowerSubstationController {
 
     }
 
-    @GetMapping("/companies/{companyId}/plants/{plantId}")
+    @GetMapping("/companies/{companyId}/plants/{powerPlantId}/substations")
     public List<PowerSubstationResponse> getAllPowerPlantSubstations(
             @PathVariable UUID companyId,
             @PathVariable UUID powerPlantId
@@ -64,5 +65,15 @@ public class PowerSubstationController {
 
     }
 
+    @PostMapping("/companies/{companyId}/plants/{powerPlantId}/substations")
+    @ResponseStatus(HttpStatus.CREATED)
+    public PowerSubstationResponse createPowerSubstation(
+            @PathVariable UUID companyId,
+            @PathVariable UUID powerPlantId,
+            @Valid @RequestBody CreatePowerSubstationRequest request
+    ) {
+        PowerSubstation powerSubstation = powerSubstationService.createSubstation(companyId, powerPlantId, request);
+        return powerSubstationMapper.toResponse(powerSubstation);
+    }
 
 }

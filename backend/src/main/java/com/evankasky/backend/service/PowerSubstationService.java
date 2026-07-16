@@ -1,8 +1,12 @@
 package com.evankasky.backend.service;
 
+import com.evankasky.backend.dto.powersubstation.CreatePowerSubstationRequest;
 import com.evankasky.backend.dto.powersubstation.PowerSubstationResponse;
 import com.evankasky.backend.exception.powercompany.PowerCompanyNotFoundException;
 import com.evankasky.backend.exception.powerplant.PowerPlantNotFoundException;
+import com.evankasky.backend.exception.powersubstation.PowerSubstationExistsException;
+import com.evankasky.backend.model.Location;
+import com.evankasky.backend.model.PowerPlant;
 import com.evankasky.backend.model.PowerSubstation;
 import com.evankasky.backend.repository.PowerCompanyRepo;
 import com.evankasky.backend.repository.PowerPlantRepo;
@@ -64,6 +68,46 @@ public class PowerSubstationService {
         ));
 
         return powerSubstationRepo.findAllByPowerPlant_Id(powerPlantId);
+
+    }
+
+    @Transactional
+    public PowerSubstation createSubstation(
+            UUID companyId,
+            UUID powerPlantId,
+            CreatePowerSubstationRequest request
+    ) {
+
+        if(!powerCompanyRepo.existsById(companyId)) {
+            throw new PowerCompanyNotFoundException("Power company not found: " + companyId);
+        }
+
+        PowerPlant powerPlant = powerPlantRepo.findByCompany_IdAndId(companyId, powerPlantId)
+                .orElseThrow(() -> new PowerPlantNotFoundException(
+                        "Power plant '" + powerPlantId + "' was not found for company '" +
+                                companyId + "'"
+        ));
+
+        String substationId = request.substationId().trim();
+
+        if(powerSubstationRepo.existsByPowerPlant_IdAndSubstationId(powerPlantId, substationId)) {
+            throw new PowerSubstationExistsException(
+                    "Power substation '" + substationId + "' already exists for power plant '" +
+                            powerPlantId + "'"
+            );
+        }
+
+        Location location = new Location(request.location().x(), request.location().y());
+
+        PowerSubstation powerSubstation = new PowerSubstation(
+                substationId,
+                request.initialInstallationCost(),
+                request.recurringMaintenanceCost(),
+                location
+        );
+
+        powerPlant.addPowerSubstation(powerSubstation);
+        return powerSubstationRepo.save(powerSubstation);
 
     }
 
