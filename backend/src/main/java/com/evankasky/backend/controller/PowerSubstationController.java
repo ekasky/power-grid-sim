@@ -96,4 +96,15 @@ public class PowerSubstationController {
 
     }
 
+    @DeleteMapping("/companies/{companyId}/plants/{powerPlantId}/substations/{powerSubstationId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePowerSubstation(
+            @PathVariable UUID companyId,
+            @PathVariable UUID powerPlantId,
+            @PathVariable UUID powerSubstationId
+    ) {
+
+        powerSubstationService.deletePowerSubstation(companyId, powerPlantId, powerSubstationId);
+    }
+
 }
