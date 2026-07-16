@@ -19,9 +19,9 @@ public record CreateTransformerRequest(
         @DecimalMin(value = "0.0", inclusive = true, message = "Initial installation cost cannot be negative")
         BigDecimal initialInstallationCost,
 
-        @NotNull(message = "Recurring generation cost is required")
-        @DecimalMin(value = "0.0", inclusive = true, message = "Recurring generation cost cannot be negative")
-        BigDecimal recurringGenerationCost,
+        @NotNull(message = "Recurring maintenance cost is required")
+        @DecimalMin(value = "0.0", inclusive = true, message = "Recurring maintenance cost cannot be negative")
+        BigDecimal recurringMaintenanceCost,
 
         @NotNull(message = "Location is required")
         @Valid

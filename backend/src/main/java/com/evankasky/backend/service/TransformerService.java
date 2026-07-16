@@ -1,9 +1,13 @@
 package com.evankasky.backend.service;
 
+import com.evankasky.backend.dto.transformer.CreateTransformerRequest;
 import com.evankasky.backend.exception.powercompany.PowerCompanyNotFoundException;
 import com.evankasky.backend.exception.powerplant.PowerPlantNotFoundException;
 import com.evankasky.backend.exception.powersubstation.PowerSubstationNotFoundException;
+import com.evankasky.backend.exception.transformer.TransformerExistsException;
 import com.evankasky.backend.exception.transformer.TransformerNotFoundException;
+import com.evankasky.backend.model.Location;
+import com.evankasky.backend.model.PowerSubstation;
 import com.evankasky.backend.model.Transformer;
 import com.evankasky.backend.repository.PowerCompanyRepo;
 import com.evankasky.backend.repository.PowerPlantRepo;
@@ -120,6 +124,54 @@ public class TransformerService {
                 .orElseThrow(() -> new TransformerNotFoundException("Transformer '" + transformerId +
                         "' was not found for substation '" + powerSubstationId + "'.")
         );
+
+    }
+
+    @Transactional
+    public Transformer createTransformer(
+            UUID companyId,
+            UUID powerPlantId,
+            UUID powerSubstationId,
+            CreateTransformerRequest request
+    ) {
+
+        powerPlantRepo.findByCompany_IdAndId(companyId, powerPlantId)
+                .orElseThrow(() -> new PowerPlantNotFoundException(
+                        "Power plant '" + powerPlantId + "' not found for company '" +
+                                companyId + "'"
+                )
+        );
+
+        PowerSubstation powerSubstation = powerSubstationRepo.findByIdAndPowerPlant_Id(powerSubstationId, powerPlantId)
+                .orElseThrow(() -> new PowerSubstationNotFoundException(
+                        "Power substation '" + powerSubstationId + "' not found for power plant '" +
+                                powerPlantId + "'"
+                )
+        );
+
+        String transformerId = request.transformerId().trim();
+
+        if(transformerRepo.existsByPowerSubstation_IdAndTransformerId(powerSubstationId, transformerId)) {
+            throw new TransformerExistsException(
+                    "Transformer '" + transformerId + "' already exists for power substation '" +
+                            powerSubstationId + "'"
+            );
+        }
+
+        Location location = new Location(
+                request.location().x(),
+                request.location().y()
+        );
+
+        Transformer transformer = new Transformer(
+                transformerId,
+                request.initialInstallationCost(),
+                request.recurringMaintenanceCost(),
+                location
+        );
+
+        powerSubstation.addTransformer(transformer);
+        return transformerRepo.save(transformer);
 
     }
 

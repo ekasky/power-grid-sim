@@ -1,9 +1,12 @@
 package com.evankasky.backend.controller;
 
+import com.evankasky.backend.dto.transformer.CreateTransformerRequest;
 import com.evankasky.backend.dto.transformer.TransformerResponse;
 import com.evankasky.backend.mapper.TransformerMapper;
 import com.evankasky.backend.model.Transformer;
 import com.evankasky.backend.service.TransformerService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -88,6 +91,20 @@ public class TransformerController {
         );
 
         return transformerMapper.toResponse(transformer);
+    }
+
+    @PostMapping("/companies/{companyId}/plants/{powerPlantId}/substations/{powerSubstationId}/transformers")
+    @ResponseStatus(HttpStatus.CREATED)
+    public TransformerResponse createTransformer(
+            @PathVariable UUID companyId,
+            @PathVariable UUID powerPlantId,
+            @PathVariable UUID powerSubstationId,
+            @Valid @RequestBody CreateTransformerRequest request
+    ) {
+
+        Transformer transformer = transformerService.createTransformer(companyId, powerPlantId, powerSubstationId, request);
+        return transformerMapper.toResponse(transformer);
+
     }
 
 }
