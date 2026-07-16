@@ -16,4 +16,5 @@ public interface PowerPlantRepo extends JpaRepository<PowerPlant, UUID> {
     Optional<PowerPlant> findByCompany_IdAndId(UUID companyId, UUID powerPlantId);
     Optional<PowerPlant> findByIdAndCompany_Id(UUID powerPlantId, UUID companyId);
 
+
 }

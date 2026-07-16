@@ -1,0 +1,19 @@
+package com.evankasky.backend.repository;
+
+import com.evankasky.backend.model.Transformer;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+public interface TransformerRepo extends JpaRepository<Transformer, UUID> {
+
+    boolean existsByPowerSubstation_IdAndTransformerId(UUID powerSubstationId, String transformerId);
+    boolean existsByPowerSubstation_IdAndTransformerIdAndIdNot(UUID powerSubstationId, String transformerId, UUID excludedTransformerId);
+    List<Transformer> findAllByPowerSubstation_Id(UUID powerSubstationId);
+    Optional<Transformer> findByIdAndPowerSubstation_Id(UUID transformerId, UUID powerSubstationId);
+    Optional<Transformer> findByPowerSubstation_IdAndTransformerId(UUID powerSubstationId, String transformerId);
+
+
+}

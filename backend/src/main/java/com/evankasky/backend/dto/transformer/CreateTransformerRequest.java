@@ -1,4 +1,4 @@
-package com.evankasky.backend.dto.powerplant;
+package com.evankasky.backend.dto.transformer;
 
 import com.evankasky.backend.dto.location.LocationRequest;
 import jakarta.validation.Valid;
@@ -9,15 +9,15 @@ import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 
-public record CreatePowerPlantRequest(
+public record CreateTransformerRequest(
 
-        @NotBlank(message = "Power plant ID is required")
-        @Size(max = 20, message = "Power plant ID cannot exceed 20 characters")
-        String plantId,
+        @NotBlank(message = "Transformer ID is required")
+        @Size(max = 20, message = "Transformer ID cannot exceed 20 characters")
+        String transformerId,
 
-        @NotNull(message = "Initial build cost is required")
-        @DecimalMin(value = "0.0", inclusive = true, message = "Initial build cost cannot be negative")
-        BigDecimal initialBuildCost,
+        @NotNull(message = "Initial installation cost is required")
+        @DecimalMin(value = "0.0", inclusive = true, message = "Initial installation cost cannot be negative")
+        BigDecimal initialInstallationCost,
 
         @NotNull(message = "Recurring generation cost is required")
         @DecimalMin(value = "0.0", inclusive = true, message = "Recurring generation cost cannot be negative")
