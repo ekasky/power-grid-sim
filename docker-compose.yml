@@ -45,5 +45,17 @@ services:
       db:
         condition: service_healthy
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../images/Dockerfile.frontend
+    image: evankasky/powergrid-frontend
+    networks:
+      - internal
+    ports:
+      - '3000:80'
+    depends_on:
+      - api
+
 volumes:
   pgdata:
