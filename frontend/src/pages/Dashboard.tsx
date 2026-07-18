@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface CountResponse {
@@ -15,6 +16,9 @@ interface CountResponse {
 }
 
 const Dashboard = () => {
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const [powerCompanyCount, setPowerCompanyCount] = useState<number | null>(
     null,
   );
@@ -128,15 +132,27 @@ const Dashboard = () => {
       }
     };
 
-    getPowerCompanyCount();
-    getPowerPlantCount();
-    getPowerSubstationCount();
-    getTransformerCount();
+    const loadSummaryCounts = async () => {
+      setIsRefreshing(true);
+
+      await Promise.all([
+        getPowerCompanyCount(),
+        getPowerPlantCount(),
+        getPowerSubstationCount(),
+        getTransformerCount(),
+      ]);
+
+      if (!controller.signal.aborted) {
+        setIsRefreshing(false);
+      }
+    };
+
+    loadSummaryCounts();
 
     return () => {
       controller.abort();
     };
-  }, []);
+  }, [refreshKey]);
 
   const summaryCards = [
     {
@@ -179,11 +195,27 @@ const Dashboard = () => {
 
   return (
     <div className='space-y-6'>
-      <div>
-        <h1 className='text-3xl font-bold tracking-tight'>Dashboard</h1>
-        <p className='text-muted-foreground'>
-          View the current state of the power grid simulator.
-        </p>
+      <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
+        <div>
+          <h1 className='text-3xl font-bold tracking-tight'>Dashboard</h1>
+
+          <p className='text-muted-foreground'>
+            View the current state of the power grid simulator.
+          </p>
+        </div>
+
+        <Button
+          type='button'
+          variant='outline'
+          onClick={() => setRefreshKey((current) => current + 1)}
+          disabled={isRefreshing}
+        >
+          <RefreshCw
+            className={`size-4 ${isRefreshing ? 'animate-spin' : ''}`}
+          />
+
+          {isRefreshing ? 'Refreshing...' : 'Refresh'}
+        </Button>
       </div>
 
       <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-4'>
