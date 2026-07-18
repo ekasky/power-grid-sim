@@ -23,6 +23,12 @@ const Dashboard = () => {
   const [powerPlantCount, setPowerPlantCount] = useState<number | null>(null);
   const [powerPlantError, setPowerPlantError] = useState<boolean>(false);
 
+  const [powerSubstationCount, setPowerSubstationCount] = useState<
+    number | null
+  >(null);
+  const [powerSubstationError, setPowerSubstationError] =
+    useState<boolean>(false);
+
   useEffect(() => {
     const controller = new AbortController();
 
@@ -75,8 +81,31 @@ const Dashboard = () => {
       }
     };
 
+    const getPowerSubstationCount = async () => {
+      try {
+        setPowerSubstationError(false);
+
+        const response = await fetch('/api/substations/count', {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to retrive power substation count: ${response.status}`,
+          );
+        }
+
+        const data: CountResponse = await response.json();
+        setPowerSubstationCount(data.count);
+      } catch (error: unknown) {
+        console.error(error);
+        setPowerSubstationError(true);
+      }
+    };
+
     getPowerCompanyCount();
     getPowerPlantCount();
+    getPowerSubstationCount();
 
     return () => {
       controller.abort();
@@ -104,7 +133,11 @@ const Dashboard = () => {
     },
     {
       label: 'Substations',
-      value: '--',
+      value: powerSubstationError
+        ? 'Error'
+        : powerSubstationCount === null
+          ? '--'
+          : powerSubstationCount.toString(),
       description: 'Connected distribution substations',
     },
     {
