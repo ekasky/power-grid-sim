@@ -83,13 +83,12 @@ public class PowerPlantController {
 
     }
 
-    @DeleteMapping("/companies/{companyId}/plants/{powerPlantId}")
+    @DeleteMapping("/plants/{powerPlantId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletePowerPlant(
-            @PathVariable UUID companyId,
             @PathVariable UUID powerPlantId
     ) {
-        powerPlantService.deletePowerPlant(companyId, powerPlantId);
+        powerPlantService.deletePowerPlant(powerPlantId);
     }
 
 }

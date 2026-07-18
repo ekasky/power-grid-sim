@@ -137,16 +137,14 @@ public class PowerPlantService {
 
     @Transactional
     public void deletePowerPlant(
-            UUID companyId,
             UUID powerPlantId
     ) {
 
-        PowerPlant powerPlant = powerPlantRepo.findByCompany_IdAndId(companyId, powerPlantId)
-                .orElseThrow(() -> new PowerPlantNotFoundException("Power plant '" +
-                        powerPlantId + "' was not found for company '" + companyId + "'.")
+        PowerPlant powerPlant = powerPlantRepo.findById(powerPlantId)
+                .orElseThrow(() -> new PowerPlantNotFoundException(
+                    "Power plant '" + powerPlantId + "' was not found"
+                )
         );
-
-        // TODO: maybe remove costs from power company?
 
         powerPlantRepo.delete(powerPlant);
 
