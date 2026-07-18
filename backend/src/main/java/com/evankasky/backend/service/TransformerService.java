@@ -85,22 +85,14 @@ public class TransformerService {
 
     @Transactional(readOnly = true)
     public List<Transformer> getAllPowerSubstationTransformers(
-            UUID companyId,
-            UUID powerPlantId,
             UUID powerSubstationId
     ) {
 
-        powerPlantRepo.findByCompany_IdAndId(companyId, powerPlantId)
-                .orElseThrow(()-> new PowerPlantNotFoundException(
-                        "Power plant '" + powerPlantId + "' not found for company '" +
-                                companyId + "'"
-        ));
-
-        powerSubstationRepo.findByIdAndPowerPlant_Id(powerSubstationId, powerPlantId)
+        powerSubstationRepo.findById(powerSubstationId)
                 .orElseThrow(() -> new PowerSubstationNotFoundException(
-                        "Power substation '" + powerSubstationId + "' not found for power plant '" +
-                                powerPlantId + "'"
-        ));
+                    "Substation '" + powerSubstationId + "' not found"
+                )
+        );
 
         return transformerRepo.findAllByPowerSubstation_Id(powerSubstationId);
 
