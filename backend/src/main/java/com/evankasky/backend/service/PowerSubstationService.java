@@ -66,13 +66,13 @@ public class PowerSubstationService {
     }
 
     @Transactional(readOnly = true)
-    public List<PowerSubstation> getAllPowerPlantsSubstations(UUID companyId, UUID powerPlantId) {
+    public List<PowerSubstation> getAllPowerPlantsSubstations(UUID powerPlantId) {
 
-        powerPlantRepo.findByCompany_IdAndId(companyId, powerPlantId)
+        powerPlantRepo.findById(powerPlantId)
                 .orElseThrow(() -> new PowerPlantNotFoundException(
-                        "Power plant '" + powerPlantId + "' was not found for company '" +
-                                companyId + "'"
-        ));
+                    "Power plant '" + powerPlantId + "' not found"
+                )
+        );
 
         return powerSubstationRepo.findAllByPowerPlant_Id(powerPlantId);
 
