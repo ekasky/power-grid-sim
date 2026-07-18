@@ -1,5 +1,6 @@
 package com.evankasky.backend.repository;
 
+import com.evankasky.backend.model.PowerCompany;
 import com.evankasky.backend.model.PowerPlant;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -15,6 +16,7 @@ public interface PowerPlantRepo extends JpaRepository<PowerPlant, UUID> {
     List<PowerPlant> findAllByCompany_ShortName(String shortName);
     Optional<PowerPlant> findByCompany_IdAndId(UUID companyId, UUID powerPlantId);
     Optional<PowerPlant> findByIdAndCompany_Id(UUID powerPlantId, UUID companyId);
+    boolean existsByCompanyAndPlantIdAndIdNot(PowerCompany company, String plantId, UUID powerPlantId);
 
 
 }

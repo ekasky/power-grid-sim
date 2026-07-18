@@ -71,14 +71,13 @@ public class PowerPlantController {
 
     }
 
-    @PatchMapping("/companies/{companyId}/plants/{powerPlantId}")
+    @PatchMapping("/plants/{powerPlantId}")
     public PowerPlantResponse updatePowerPlant(
-            @PathVariable UUID companyId,
             @PathVariable UUID powerPlantId,
             @Valid @RequestBody UpdatePowerPlantRequest request
     ) {
 
-        PowerPlant powerPlant = powerPlantService.updatePowerPlant(companyId, powerPlantId, request);
+        PowerPlant powerPlant = powerPlantService.updatePowerPlant(powerPlantId, request);
         return powerPlantMapper.toResponse(powerPlant);
 
     }

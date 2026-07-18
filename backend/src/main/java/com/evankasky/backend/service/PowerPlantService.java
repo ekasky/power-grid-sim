@@ -92,23 +92,23 @@ public class PowerPlantService {
 
     @Transactional
     public PowerPlant updatePowerPlant(
-            UUID companyId,
             UUID powerPlantId,
             UpdatePowerPlantRequest request
     ) {
 
-        PowerPlant powerPlant = powerPlantRepo.findByCompany_IdAndId(companyId, powerPlantId)
+        PowerPlant powerPlant = powerPlantRepo.findById(powerPlantId)
                 .orElseThrow(() -> new PowerPlantNotFoundException(
-                        "Power plant '" + powerPlantId + "' was not found for company '" + companyId + "'."
+                        "Power plant '" + powerPlantId + "' was not found"
         ));
 
         if(request.plantId() != null) {
 
            String plantId = request.plantId().trim();
 
-           if(powerPlantRepo.existsByCompany_IdAndPlantIdAndIdNot(companyId, plantId, powerPlantId)) {
+           if(powerPlantRepo.existsByCompanyAndPlantIdAndIdNot(powerPlant.getCompany(),plantId, powerPlantId)) {
                throw new PowerPlantExistsException(
-                       "Power plant ID '" + plantId + "' is already used by another plant in this company"
+                       "Power plant ID '" + plantId +
+                               "' is already used by another plant in this company"
                );
            }
 
