@@ -40,6 +40,11 @@ public class PowerPlantService {
         return powerPlantRepo.findAll();
     }
 
+    @Transactional
+    public long getPowerPlantCount() {
+        return powerPlantRepo.count();
+    }
+
     @Transactional(readOnly = true)
     public List<PowerPlant> getAllCompaniesPowerPlants(UUID companyId) {
 

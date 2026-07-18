@@ -1,6 +1,7 @@
 package com.evankasky.backend.controller;
 
 import com.evankasky.backend.dto.powerplant.CreatePowerPlantRequest;
+import com.evankasky.backend.dto.powerplant.PowerPlantCountResponse;
 import com.evankasky.backend.dto.powerplant.PowerPlantResponse;
 import com.evankasky.backend.dto.powerplant.UpdatePowerPlantRequest;
 import com.evankasky.backend.mapper.PowerPlantMapper;
@@ -39,6 +40,12 @@ public class PowerPlantController {
                 .stream()
                 .map(powerPlantMapper::toResponse)
                 .toList();
+    }
+
+    @GetMapping("/plants/count")
+    public PowerPlantCountResponse getPowerPlantCount() {
+        long count = powerPlantService.getPowerPlantCount();
+        return new PowerPlantCountResponse(count);
     }
 
     @GetMapping("/companies/{companyId}/plants")
