@@ -1,7 +1,7 @@
 package com.evankasky.backend.controller;
 
+import com.evankasky.backend.dto.CountResponse;
 import com.evankasky.backend.dto.powercompany.CreatePowerCompanyRequest;
-import com.evankasky.backend.dto.powercompany.PowerCompanyCountResponse;
 import com.evankasky.backend.dto.powercompany.PowerCompanyResponse;
 import com.evankasky.backend.dto.powercompany.UpdatePowerCompanyRequest;
 import com.evankasky.backend.mapper.PowerCompanyMapper;
@@ -45,9 +45,9 @@ public class PowerCompanyController {
     }
 
     @GetMapping("/count")
-    public PowerCompanyCountResponse getPowerCompanyCount() {
+    public CountResponse getPowerCompanyCount() {
         long count = powerCompanyService.getPowerCompanyCount();
-        return new PowerCompanyCountResponse(count);
+        return new CountResponse(count);
     }
 
     @PostMapping

@@ -1,5 +1,6 @@
 package com.evankasky.backend.controller;
 
+import com.evankasky.backend.dto.CountResponse;
 import com.evankasky.backend.dto.powersubstation.CreatePowerSubstationRequest;
 import com.evankasky.backend.dto.powersubstation.PowerSubstationResponse;
 import com.evankasky.backend.dto.powersubstation.UpdatePowerSubstationRequest;
@@ -39,6 +40,12 @@ public class PowerSubstationController {
                 .stream()
                 .map(powerSubstationMapper::toResponse)
                 .toList();
+    }
+
+    @GetMapping("/substations/count")
+    public CountResponse getPowerSubstationCount() {
+        long count = powerSubstationService.getPowerSubstationCount();
+        return new CountResponse(count);
     }
 
     @GetMapping("/companies/{companyId}/substations")

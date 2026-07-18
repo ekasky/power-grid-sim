@@ -50,6 +50,11 @@ public class PowerSubstationService {
     }
 
     @Transactional(readOnly = true)
+    public long getPowerSubstationCount() {
+        return powerSubstationRepo.count();
+    }
+
+    @Transactional(readOnly = true)
     public List<PowerSubstation> getAllPowerCompaniesSubstations(UUID companyId) {
 
         if(!powerCompanyRepo.existsById(companyId)) {
