@@ -28,6 +28,10 @@ const AppLayout = () => {
           <NavLink to='/create-power-plant' className={linkClass}>
             Create Power Plant
           </NavLink>
+
+          <NavLink to='/create-substation' className={linkClass}>
+            Create Substation
+          </NavLink>
         </nav>
       </aside>
 
