@@ -98,50 +98,15 @@ public class TransformerService {
 
     }
 
-    @Transactional(readOnly = true)
-    public Transformer getTransformerByTransformerId(
-            UUID companyId,
-            UUID powerPlantId,
-            UUID powerSubstationId,
-            String transformerId
-    ) {
-
-        powerPlantRepo.findByCompany_IdAndId(companyId, powerPlantId)
-                .orElseThrow(() -> new PowerPlantNotFoundException("Power plant '" + powerPlantId +
-                        "' was not found for company '" + companyId + "'.")
-        );
-
-        powerSubstationRepo.findByIdAndPowerPlant_Id(powerSubstationId, powerPlantId)
-                .orElseThrow(() -> new PowerSubstationNotFoundException("Power substation '" + powerSubstationId +
-                        "' was not found for power plant '" + powerPlantId + "'.")
-        );
-
-        return transformerRepo.findByPowerSubstation_IdAndTransformerId(powerSubstationId, transformerId.trim())
-                .orElseThrow(() -> new TransformerNotFoundException("Transformer '" + transformerId +
-                        "' was not found for substation '" + powerSubstationId + "'.")
-        );
-
-    }
-
     @Transactional
     public Transformer createTransformer(
-            UUID companyId,
-            UUID powerPlantId,
             UUID powerSubstationId,
             CreateTransformerRequest request
     ) {
 
-        powerPlantRepo.findByCompany_IdAndId(companyId, powerPlantId)
-                .orElseThrow(() -> new PowerPlantNotFoundException(
-                        "Power plant '" + powerPlantId + "' not found for company '" +
-                                companyId + "'"
-                )
-        );
-
-        PowerSubstation powerSubstation = powerSubstationRepo.findByIdAndPowerPlant_Id(powerSubstationId, powerPlantId)
+        PowerSubstation powerSubstation = powerSubstationRepo.findById(powerSubstationId)
                 .orElseThrow(() -> new PowerSubstationNotFoundException(
-                        "Power substation '" + powerSubstationId + "' not found for power plant '" +
-                                powerPlantId + "'"
+                        "Power substation '" + powerSubstationId + "' not found"
                 )
         );
 

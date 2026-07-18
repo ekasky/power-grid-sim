@@ -78,36 +78,15 @@ public class TransformerController {
                 .toList();
     }
 
-    @GetMapping(
-            value = "/companies/{companyId}/plants/{powerPlantId}/substations/{powerSubstationId}/transformers",
-            params = "transformerId"
-    )
-    public TransformerResponse getTransformerByTransformerId(
-            @PathVariable UUID companyId,
-            @PathVariable UUID powerPlantId,
-            @PathVariable UUID powerSubstationId,
-            @RequestParam String transformerId
-    ) {
-        Transformer transformer = transformerService.getTransformerByTransformerId(
-                companyId,
-                powerPlantId,
-                powerSubstationId,
-                transformerId
-        );
 
-        return transformerMapper.toResponse(transformer);
-    }
-
-    @PostMapping("/companies/{companyId}/plants/{powerPlantId}/substations/{powerSubstationId}/transformers")
+    @PostMapping("/substations/{powerSubstationId}/transformers")
     @ResponseStatus(HttpStatus.CREATED)
     public TransformerResponse createTransformer(
-            @PathVariable UUID companyId,
-            @PathVariable UUID powerPlantId,
             @PathVariable UUID powerSubstationId,
             @Valid @RequestBody CreateTransformerRequest request
     ) {
 
-        Transformer transformer = transformerService.createTransformer(companyId, powerPlantId, powerSubstationId, request);
+        Transformer transformer = transformerService.createTransformer(powerSubstationId, request);
         return transformerMapper.toResponse(transformer);
 
     }
