@@ -38,9 +38,13 @@ const createTransformerSchema = z.object({
     .min(1, 'Transformer ID is required')
     .max(50, 'Transformer ID cannot exceed 50 characters'),
 
-  installCost: z.number().min(0, 'Installation cost cannot be negative'),
+  initialInstallationCost: z
+    .number()
+    .min(0, 'Installation cost cannot be negative'),
 
-  maintenanceCost: z.number().min(0, 'Maintenance cost cannot be negative'),
+  recurringMaintenanceCost: z
+    .number()
+    .min(0, 'Maintenance cost cannot be negative'),
 
   x: z.number().int('X coordinate must be an integer'),
 
@@ -114,8 +118,8 @@ const CreateTransformer = () => {
       powerPlantId: '',
       substationId: '',
       transformerId: '',
-      installCost: 0,
-      maintenanceCost: 0,
+      initialInstallationCost: 0,
+      recurringMaintenanceCost: 0,
       x: 0,
       y: 0,
     },
@@ -242,7 +246,7 @@ const CreateTransformer = () => {
     const getPowerSubstations = async () => {
       try {
         const response = await fetch(
-          `/api/companies/${selectedCompanyId}/plants/${selectedPowerPlantId}/substations`,
+          `/api/plants/${selectedPowerPlantId}/substations`,
           {
             signal: controller.signal,
           },
@@ -306,8 +310,8 @@ const CreateTransformer = () => {
 
     const request: CreateTransformerRequest = {
       transformerId: values.transformerId,
-      initialInstallationCost: values.installCost,
-      recurringMaintenanceCost: values.maintenanceCost,
+      initialInstallationCost: values.initialInstallationCost,
+      recurringMaintenanceCost: values.recurringMaintenanceCost,
       location: {
         x: values.x,
         y: values.y,
@@ -316,7 +320,7 @@ const CreateTransformer = () => {
 
     try {
       const response = await fetch(
-        `/api/companies/${selectedCompanyId}/plants/${selectedPowerPlantId}/substations/${values.substationId}/transformers`,
+        `/api/substations/${values.substationId}/transformers`,
         {
           method: 'POST',
           headers: {
@@ -621,16 +625,16 @@ const CreateTransformer = () => {
                     min='0'
                     step='0.01'
                     className='h-11 pl-8'
-                    aria-invalid={Boolean(errors.installCost)}
-                    {...register('installCost', {
+                    aria-invalid={Boolean(errors.initialInstallationCost)}
+                    {...register('initialInstallationCost', {
                       valueAsNumber: true,
                     })}
                   />
                 </div>
 
-                {errors.installCost && (
+                {errors.initialInstallationCost && (
                   <p className='text-sm text-destructive'>
-                    {errors.installCost.message}
+                    {errors.initialInstallationCost.message}
                   </p>
                 )}
               </div>
@@ -649,16 +653,16 @@ const CreateTransformer = () => {
                     min='0'
                     step='0.01'
                     className='h-11 pl-8'
-                    aria-invalid={Boolean(errors.maintenanceCost)}
-                    {...register('maintenanceCost', {
+                    aria-invalid={Boolean(errors.recurringMaintenanceCost)}
+                    {...register('recurringMaintenanceCost', {
                       valueAsNumber: true,
                     })}
                   />
                 </div>
 
-                {errors.maintenanceCost && (
+                {errors.recurringMaintenanceCost && (
                   <p className='text-sm text-destructive'>
-                    {errors.maintenanceCost.message}
+                    {errors.recurringMaintenanceCost.message}
                   </p>
                 )}
               </div>
