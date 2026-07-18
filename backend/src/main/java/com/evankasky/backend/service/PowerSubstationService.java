@@ -80,31 +80,29 @@ public class PowerSubstationService {
 
     @Transactional
     public PowerSubstation createSubstation(
-            UUID companyId,
             UUID powerPlantId,
             CreatePowerSubstationRequest request
     ) {
 
-        if(!powerCompanyRepo.existsById(companyId)) {
-            throw new PowerCompanyNotFoundException("Power company not found: " + companyId);
-        }
-
-        PowerPlant powerPlant = powerPlantRepo.findByCompany_IdAndId(companyId, powerPlantId)
+        PowerPlant powerPlant = powerPlantRepo.findById(powerPlantId)
                 .orElseThrow(() -> new PowerPlantNotFoundException(
-                        "Power plant '" + powerPlantId + "' was not found for company '" +
-                                companyId + "'"
-        ));
+                    "Power plant '" + powerPlantId + "' not found"
+                )
+        );
 
         String substationId = request.substationId().trim();
 
         if(powerSubstationRepo.existsByPowerPlant_IdAndSubstationId(powerPlantId, substationId)) {
             throw new PowerSubstationExistsException(
-                    "Power substation '" + substationId + "' already exists for power plant '" +
-                            powerPlantId + "'"
+                    "Substation '" + substationId + "' already exists for power plant '" +
+                            powerPlant.getPlantId() + "'"
             );
         }
 
-        Location location = new Location(request.location().x(), request.location().y());
+        Location location = new Location(
+                request.location().x(),
+                request.location().y()
+        );
 
         PowerSubstation powerSubstation = new PowerSubstation(
                 substationId,

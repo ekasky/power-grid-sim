@@ -72,14 +72,13 @@ public class PowerSubstationController {
 
     }
 
-    @PostMapping("/companies/{companyId}/plants/{powerPlantId}/substations")
+    @PostMapping("/plants/{powerPlantId}/substations")
     @ResponseStatus(HttpStatus.CREATED)
     public PowerSubstationResponse createPowerSubstation(
-            @PathVariable UUID companyId,
             @PathVariable UUID powerPlantId,
             @Valid @RequestBody CreatePowerSubstationRequest request
     ) {
-        PowerSubstation powerSubstation = powerSubstationService.createSubstation(companyId, powerPlantId, request);
+        PowerSubstation powerSubstation = powerSubstationService.createSubstation(powerPlantId, request);
         return powerSubstationMapper.toResponse(powerSubstation);
     }
 
