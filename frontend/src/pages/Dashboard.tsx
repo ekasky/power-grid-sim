@@ -1,3 +1,4 @@
+import { SummaryCard } from '@/components/summary-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -163,6 +164,7 @@ const Dashboard = () => {
           ? '--'
           : powerCompanyCount.toString(),
       description: 'Companies in the simulation',
+      to: '/power-companies',
     },
     {
       label: 'Power Plants',
@@ -172,6 +174,7 @@ const Dashboard = () => {
           ? '--'
           : powerPlantCount.toString(),
       description: 'Power generation facilities',
+      to: '/power-plants',
     },
     {
       label: 'Substations',
@@ -181,6 +184,7 @@ const Dashboard = () => {
           ? '--'
           : powerSubstationCount.toString(),
       description: 'Connected distribution substations',
+      to: '/substations',
     },
     {
       label: 'Transformers',
@@ -190,6 +194,7 @@ const Dashboard = () => {
           ? '--'
           : transformerCount.toString(),
       description: 'Customer transformers',
+      to: '/transformers',
     },
   ];
 
@@ -220,18 +225,12 @@ const Dashboard = () => {
 
       <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-4'>
         {summaryCards.map((card) => (
-          <Card key={card.label}>
-            <CardHeader className='pb-2'>
-              <CardDescription>{card.label}</CardDescription>
-              <CardTitle className='text-3xl'>{card.value}</CardTitle>
-            </CardHeader>
-
-            <CardContent>
-              <p className='text-sm text-muted-foreground'>
-                {card.description}
-              </p>
-            </CardContent>
-          </Card>
+          <SummaryCard
+            label={card.label}
+            value={card.value}
+            description={card.description}
+            to={card.to}
+          />
         ))}
       </div>
 

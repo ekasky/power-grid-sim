@@ -4,6 +4,10 @@ import CreatePowerPlant from '@/pages/create-power-plant';
 import CreatePowerSubstation from '@/pages/create-power-substation';
 import CreateTransformer from '@/pages/create-transformer';
 import Dashboard from '@/pages/Dashboard';
+import PowerCompanies from '@/pages/power-companies';
+import PowerPlants from '@/pages/power-plants';
+import Substations from '@/pages/substations';
+import Transformers from '@/pages/transformers';
 import { createBrowserRouter } from 'react-router-dom';
 
 export const router = createBrowserRouter([
@@ -30,6 +34,22 @@ export const router = createBrowserRouter([
       {
         path: '/create-transformer',
         element: <CreateTransformer />,
+      },
+      {
+        path: '/power-companies',
+        element: <PowerCompanies />,
+      },
+      {
+        path: '/power-plants',
+        element: <PowerPlants />,
+      },
+      {
+        path: '/substations',
+        element: <Substations />,
+      },
+      {
+        path: '/transformers',
+        element: <Transformers />,
       },
     ],
   },
