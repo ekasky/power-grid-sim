@@ -36,9 +36,13 @@ const createPowerSubstationSchema = z.object({
     .min(1, 'Substation ID is required')
     .max(50, 'Substation ID cannot exceed 50 characters'),
 
-  initialBuildCost: z.number().min(0, 'Initial build cost cannot be negative'),
+  initialInstallationCost: z
+    .number()
+    .min(0, 'Initial installation cost cannot be negative'),
 
-  maintenanceCost: z.number().min(0, 'Maintenance cost cannot be negative'),
+  recurringMaintenanceCost: z
+    .number()
+    .min(0, 'Recurring maintenance cost cannot be negative'),
 
   x: z.number().int('X coordinate must be an integer'),
 
@@ -98,8 +102,8 @@ const CreatePowerSubstation = () => {
       companyId: '',
       powerPlantId: '',
       substationId: '',
-      initialBuildCost: 0,
-      maintenanceCost: 0,
+      initialInstallationCost: 0,
+      recurringMaintenanceCost: 0,
       x: 0,
       y: 0,
     },
@@ -222,8 +226,8 @@ const CreatePowerSubstation = () => {
 
     const request: CreatePowerSubstationRequest = {
       substationId: values.substationId,
-      initialInstallationCost: values.initialBuildCost,
-      recurringMaintenanceCost: values.maintenanceCost,
+      initialInstallationCost: values.initialInstallationCost,
+      recurringMaintenanceCost: values.recurringMaintenanceCost,
       location: {
         x: values.x,
         y: values.y,
@@ -232,7 +236,7 @@ const CreatePowerSubstation = () => {
 
     try {
       const response = await fetch(
-        `/api/companies/${values.companyId}/plants/${values.powerPlantId}/substations`,
+        `/api/plants/${values.powerPlantId}/substations`,
         {
           method: 'POST',
           headers: {
@@ -466,16 +470,16 @@ const CreatePowerSubstation = () => {
                     min='0'
                     step='0.01'
                     className='h-11 pl-8'
-                    aria-invalid={Boolean(errors.initialBuildCost)}
-                    {...register('initialBuildCost', {
+                    aria-invalid={Boolean(errors.initialInstallationCost)}
+                    {...register('initialInstallationCost', {
                       valueAsNumber: true,
                     })}
                   />
                 </div>
 
-                {errors.initialBuildCost && (
+                {errors.initialInstallationCost && (
                   <p className='text-sm text-destructive'>
-                    {errors.initialBuildCost.message}
+                    {errors.initialInstallationCost.message}
                   </p>
                 )}
               </div>
@@ -494,16 +498,16 @@ const CreatePowerSubstation = () => {
                     min='0'
                     step='0.01'
                     className='h-11 pl-8'
-                    aria-invalid={Boolean(errors.maintenanceCost)}
-                    {...register('maintenanceCost', {
+                    aria-invalid={Boolean(errors.recurringMaintenanceCost)}
+                    {...register('recurringMaintenanceCost', {
                       valueAsNumber: true,
                     })}
                   />
                 </div>
 
-                {errors.maintenanceCost && (
+                {errors.recurringMaintenanceCost && (
                   <p className='text-sm text-destructive'>
-                    {errors.maintenanceCost.message}
+                    {errors.recurringMaintenanceCost.message}
                   </p>
                 )}
               </div>
