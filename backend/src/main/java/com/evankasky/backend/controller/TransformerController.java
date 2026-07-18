@@ -91,19 +91,13 @@ public class TransformerController {
 
     }
 
-    @PatchMapping("/companies/{companyId}/plants/{powerPlantId}/substations/{powerSubstationId}/transformers/{transformerId}")
+    @PatchMapping("/transformers/{transformerId}")
     public TransformerResponse updateTransformer(
-            @PathVariable UUID companyId,
-            @PathVariable UUID powerPlantId,
-            @PathVariable UUID powerSubstationId,
             @PathVariable UUID transformerId,
             @Valid @RequestBody UpdateTransformerRequest request
     ) {
 
         Transformer transformer = transformerService.updateTransformer(
-                companyId,
-                powerPlantId,
-                powerSubstationId,
                 transformerId,
                 request
         );

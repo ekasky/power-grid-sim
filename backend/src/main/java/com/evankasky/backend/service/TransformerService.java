@@ -138,33 +138,22 @@ public class TransformerService {
 
     @Transactional
     public Transformer updateTransformer(
-            UUID companyId,
-            UUID powerPlantId,
-            UUID powerSubstationId,
             UUID transformerId,
             UpdateTransformerRequest request
     ) {
 
-        powerPlantRepo.findByCompany_IdAndId(companyId, powerPlantId)
-                .orElseThrow(() -> new PowerPlantNotFoundException(
-                        "Power plant '" + powerPlantId + "' not found for company '" + companyId + "'")
-        );
-
-        powerSubstationRepo.findByIdAndPowerPlant_Id(powerSubstationId, powerPlantId)
-                .orElseThrow(() -> new PowerSubstationNotFoundException(
-                        "Power substation '" + powerSubstationId + "' not found for power plant '" + powerPlantId + "'")
-        );
-
-        Transformer transformer = transformerRepo.findByIdAndPowerSubstation_Id(transformerId, powerSubstationId)
+        Transformer transformer = transformerRepo.findById(transformerId)
                 .orElseThrow(() -> new TransformerNotFoundException(
-                        "Transformer '" + transformerId + "' not found for power substation '" + powerSubstationId + "'")
+                        "Transformer '" + transformerId + "' not found ")
         );
+
+        PowerSubstation powerSubstation = transformer.getPowerSubstation();
 
         if (request.transformerId() != null) {
             String newTransformerId = request.transformerId().trim();
 
             boolean transformerIdExists = transformerRepo.existsByPowerSubstation_IdAndTransformerIdAndIdNot(
-                    powerSubstationId,
+                    powerSubstation.getId(),
                     newTransformerId,
                     transformerId
             );
@@ -172,7 +161,7 @@ public class TransformerService {
             if (transformerIdExists) {
                 throw new TransformerExistsException(
                         "Transformer ID '" + newTransformerId + "' is already used by another transformer " +
-                                "in power substation '" + powerSubstationId + "'"
+                                "in power substation '" + powerSubstation.getSubstationId() + "'"
                 );
             }
 
