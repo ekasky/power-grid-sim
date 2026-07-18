@@ -58,12 +58,11 @@ public class TransformerController {
                 .toList();
     }
 
-    @GetMapping("/companies/{companyId}/plants/{powerPlantId}/transformers")
+    @GetMapping("/plants/{powerPlantId}/transformers")
     public List<TransformerResponse> getAllPowerPlantsTransformers(
-            @PathVariable UUID companyId,
             @PathVariable UUID powerPlantId
     ) {
-        return transformerService.getAllPowerPlantsTransformers(companyId, powerPlantId)
+        return transformerService.getAllPowerPlantsTransformers(powerPlantId)
                 .stream()
                 .map(transformerMapper::toResponse)
                 .toList();

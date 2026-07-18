@@ -71,14 +71,12 @@ public class TransformerService {
 
     @Transactional(readOnly = true)
     public List<Transformer> getAllPowerPlantsTransformers(
-            UUID companyId,
             UUID powerPlantId
     ) {
 
-        powerPlantRepo.findByCompany_IdAndId(companyId, powerPlantId)
+        powerPlantRepo.findById(powerPlantId)
                 .orElseThrow(()-> new PowerPlantNotFoundException(
-                        "Power plant '" + powerPlantId + "' not found for company '" +
-                                companyId + "'"
+                        "Power plant '" + powerPlantId + "' not found"
         ));
 
         return transformerRepo.findAllByPowerSubstation_PowerPlant_Id(powerPlantId);
