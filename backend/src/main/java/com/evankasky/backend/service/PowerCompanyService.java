@@ -37,6 +37,11 @@ public class PowerCompanyService {
         return powerCompanyRepo.findAll();
     }
 
+    @Transactional(readOnly = true)
+    public long getPowerCompanyCount() {
+        return powerCompanyRepo.count();
+    }
+
     @Transactional
     public PowerCompany createPowerCompany(CreatePowerCompanyRequest request) {
 

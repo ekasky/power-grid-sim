@@ -8,31 +8,82 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { useEffect, useState } from 'react';
 
-const summaryCards = [
-  {
-    label: 'Power Companies',
-    value: '--',
-    description: 'Companies in the simulation',
-  },
-  {
-    label: 'Power Plants',
-    value: '--',
-    description: 'Power generation facilities',
-  },
-  {
-    label: 'Substations',
-    value: '--',
-    description: 'Connected distribution substations',
-  },
-  {
-    label: 'Transformers',
-    value: '--',
-    description: 'Customer transformers',
-  },
-];
+interface PowerCompanyCountResponse {
+  count: number;
+}
 
 const Dashboard = () => {
+  const [powerCompanyCount, setPowerCompanyCount] = useState<number | null>(
+    null,
+  );
+  const [powerCompanyError, setPowerCompanyError] = useState<boolean>(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const getPowerCompanyCount = async () => {
+      try {
+        setPowerCompanyError(false);
+
+        const response = await fetch('/api/companies/count', {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to retrieve power company count: ${response.status}`,
+          );
+        }
+
+        const data: PowerCompanyCountResponse = await response.json();
+
+        setPowerCompanyCount(data.count);
+      } catch (error: unknown) {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          return;
+        }
+
+        console.error(error);
+        setPowerCompanyError(true);
+      }
+    };
+
+    getPowerCompanyCount();
+
+    return () => {
+      controller.abort();
+    };
+  }, []);
+
+  const summaryCards = [
+    {
+      label: 'Power Companies',
+      value: powerCompanyError
+        ? 'Error'
+        : powerCompanyCount === null
+          ? '--'
+          : powerCompanyCount.toString(),
+      description: 'Companies in the simulation',
+    },
+    {
+      label: 'Power Plants',
+      value: '--',
+      description: 'Power generation facilities',
+    },
+    {
+      label: 'Substations',
+      value: '--',
+      description: 'Connected distribution substations',
+    },
+    {
+      label: 'Transformers',
+      value: '--',
+      description: 'Customer transformers',
+    },
+  ];
+
   return (
     <div className='space-y-6'>
       <div>
