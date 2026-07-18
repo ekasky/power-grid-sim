@@ -166,25 +166,12 @@ public class PowerSubstationService {
 
     @Transactional
     public void deletePowerSubstation(
-            UUID companyId,
-            UUID powerPlantId,
             UUID powerSubstationId
     ) {
 
-        if(!powerCompanyRepo.existsById(companyId)) {
-            throw new PowerCompanyNotFoundException("Power company not found: " + companyId);
-        }
-
-        powerPlantRepo.findByCompany_IdAndId(companyId, powerPlantId)
-                .orElseThrow(() -> new PowerPlantNotFoundException(
-                        "Power plant '" + powerPlantId + "' not found for company '" +
-                                companyId + "'"
-        ));
-
-        PowerSubstation powerSubstation = powerSubstationRepo.findByIdAndPowerPlant_Id(powerSubstationId, powerPlantId)
+        PowerSubstation powerSubstation = powerSubstationRepo.findById(powerSubstationId)
                 .orElseThrow(() -> new PowerSubstationNotFoundException(
-                        "Power substation '" + powerSubstationId + "' not found for power plant '" +
-                                powerPlantId + "'"
+                        "Power substation '" + powerSubstationId + "' not found"
         ));
 
         powerSubstationRepo.delete(powerSubstation);
