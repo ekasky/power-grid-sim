@@ -10,7 +10,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { useEffect, useState } from 'react';
 
-interface PowerCompanyCountResponse {
+interface CountResponse {
   count: number;
 }
 
@@ -19,6 +19,9 @@ const Dashboard = () => {
     null,
   );
   const [powerCompanyError, setPowerCompanyError] = useState<boolean>(false);
+
+  const [powerPlantCount, setPowerPlantCount] = useState<number | null>(null);
+  const [powerPlantError, setPowerPlantError] = useState<boolean>(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -37,7 +40,7 @@ const Dashboard = () => {
           );
         }
 
-        const data: PowerCompanyCountResponse = await response.json();
+        const data: CountResponse = await response.json();
 
         setPowerCompanyCount(data.count);
       } catch (error: unknown) {
@@ -50,7 +53,30 @@ const Dashboard = () => {
       }
     };
 
+    const getPowerPlantCount = async () => {
+      try {
+        setPowerPlantError(false);
+
+        const response = await fetch('/api/plants/count', {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to retrive power plant count: ${response.status}`,
+          );
+        }
+
+        const data: CountResponse = await response.json();
+        setPowerPlantCount(data.count);
+      } catch (error: unknown) {
+        console.error(error);
+        setPowerPlantError(true);
+      }
+    };
+
     getPowerCompanyCount();
+    getPowerPlantCount();
 
     return () => {
       controller.abort();
@@ -69,7 +95,11 @@ const Dashboard = () => {
     },
     {
       label: 'Power Plants',
-      value: '--',
+      value: powerPlantError
+        ? 'Error'
+        : powerPlantCount === null
+          ? '--'
+          : powerPlantCount.toString(),
       description: 'Power generation facilities',
     },
     {
