@@ -82,17 +82,13 @@ public class PowerSubstationController {
         return powerSubstationMapper.toResponse(powerSubstation);
     }
 
-    @PatchMapping("/companies/{companyId}/plants/{powerPlantId}/substations/{powerSubstationId}")
+    @PatchMapping("/substations/{powerSubstationId}")
     public PowerSubstationResponse updatePowerSubstation(
-            @PathVariable UUID companyId,
-            @PathVariable UUID powerPlantId,
             @PathVariable UUID powerSubstationId,
             @Valid @RequestBody UpdatePowerSubstationRequest request
     ) {
 
         PowerSubstation powerSubstation = powerSubstationService.updatePowerSubstation(
-                companyId,
-                powerPlantId,
                 powerSubstationId,
                 request
         );

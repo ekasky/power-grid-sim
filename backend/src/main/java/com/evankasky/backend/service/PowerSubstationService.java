@@ -118,27 +118,17 @@ public class PowerSubstationService {
 
     @Transactional
     public PowerSubstation updatePowerSubstation(
-            UUID companyId,
-            UUID powerPlantId,
             UUID powerSubstationId,
             UpdatePowerSubstationRequest request
     ) {
 
-        if(!powerCompanyRepo.existsById(companyId)) {
-            throw new PowerCompanyNotFoundException("Power company not found: " + companyId);
-        }
-
-        powerPlantRepo.findByCompany_IdAndId(companyId, powerPlantId)
-                .orElseThrow(() -> new PowerPlantNotFoundException(
-                        "Power plant '" + powerPlantId + "' was not found for company '" +
-                                companyId + "'"
-        ));
-
-        PowerSubstation powerSubstation = powerSubstationRepo.findByIdAndPowerPlant_Id(powerSubstationId, powerPlantId)
+        PowerSubstation powerSubstation = powerSubstationRepo.findById(powerSubstationId)
                 .orElseThrow(() -> new PowerSubstationNotFoundException(
-                        "Power substation '" + powerSubstationId + "' was not found for power plant '" +
-                                powerPlantId + "'"
-        ));
+                        "Power substation '" + powerSubstationId + "' not found"
+                )
+        );
+
+        UUID powerPlantId = powerSubstation.getPowerPlant().getId();
 
         if(request.substationId() != null) {
 
