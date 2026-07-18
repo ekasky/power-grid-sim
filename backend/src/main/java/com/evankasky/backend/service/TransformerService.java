@@ -191,25 +191,11 @@ public class TransformerService {
 
     @Transactional
     public void deleteTransformer(
-            UUID companyId,
-            UUID powerPlantId,
-            UUID powerSubstationId,
             UUID transformerId
     ) {
 
-        powerPlantRepo.findByCompany_IdAndId(companyId, powerPlantId)
-                .orElseThrow(() -> new PowerPlantNotFoundException("Power plant '" + powerPlantId +
-                        "' not found for company '" + companyId + "'")
-        );
-
-        powerSubstationRepo.findByIdAndPowerPlant_Id(powerSubstationId, powerPlantId)
-                .orElseThrow(() -> new PowerSubstationNotFoundException("Power substation '" + powerSubstationId +
-                        "' not found for power plant '" + powerPlantId + "'")
-        );
-
-        Transformer transformer = transformerRepo.findByIdAndPowerSubstation_Id(transformerId, powerSubstationId)
-                .orElseThrow(() -> new TransformerNotFoundException("Transformer '" + transformerId +
-                        "' not found for power substation '" + powerSubstationId + "'")
+        Transformer transformer = transformerRepo.findById(transformerId)
+                .orElseThrow(() -> new TransformerNotFoundException("Transformer '" + transformerId + "' not found")
         );
 
         transformerRepo.delete(transformer);

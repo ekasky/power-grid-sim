@@ -106,18 +106,12 @@ public class TransformerController {
 
     }
 
-    @DeleteMapping("/companies/{companyId}/plants/{powerPlantId}/substations/{powerSubstationId}/transformers/{transformerId}")
+    @DeleteMapping("/transformers/{transformerId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTransformer(
-            @PathVariable UUID companyId,
-            @PathVariable UUID powerPlantId,
-            @PathVariable UUID powerSubstationId,
             @PathVariable UUID transformerId
     ) {
         transformerService.deleteTransformer(
-                companyId,
-                powerPlantId,
-                powerSubstationId,
                 transformerId
         );
     }
