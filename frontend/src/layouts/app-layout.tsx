@@ -32,6 +32,10 @@ const AppLayout = () => {
           <NavLink to='/create-substation' className={linkClass}>
             Create Substation
           </NavLink>
+
+          <NavLink to='/create-transformer' className={linkClass}>
+            Create Transformer
+          </NavLink>
         </nav>
       </aside>
 
