@@ -54,6 +54,11 @@ public class TransformerService {
     }
 
     @Transactional(readOnly = true)
+    public long getTransformerCount() {
+        return transformerRepo.count();
+    }
+
+    @Transactional(readOnly = true)
     public List<Transformer> getAllPowerCompaniesTransformers(UUID companyId) {
 
         if(!powerCompanyRepo.existsById(companyId)) {

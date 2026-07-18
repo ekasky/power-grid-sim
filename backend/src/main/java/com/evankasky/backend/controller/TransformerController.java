@@ -1,5 +1,6 @@
 package com.evankasky.backend.controller;
 
+import com.evankasky.backend.dto.CountResponse;
 import com.evankasky.backend.dto.transformer.CreateTransformerRequest;
 import com.evankasky.backend.dto.transformer.TransformerResponse;
 import com.evankasky.backend.dto.transformer.UpdateTransformerRequest;
@@ -39,6 +40,12 @@ public class TransformerController {
                 .stream()
                 .map(transformerMapper::toResponse)
                 .toList();
+    }
+
+    @GetMapping("/transformers/count")
+    public CountResponse getTransformerCount() {
+        long count = transformerService.getTransformerCount();
+        return new CountResponse(count);
     }
 
     @GetMapping("/companies/{companyId}/transformers")
