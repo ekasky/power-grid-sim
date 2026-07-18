@@ -29,6 +29,9 @@ const Dashboard = () => {
   const [powerSubstationError, setPowerSubstationError] =
     useState<boolean>(false);
 
+  const [transformerCount, setTransformerCount] = useState<number | null>(null);
+  const [transformerError, setTransformerError] = useState<boolean>(false);
+
   useEffect(() => {
     const controller = new AbortController();
 
@@ -103,9 +106,32 @@ const Dashboard = () => {
       }
     };
 
+    const getTransformerCount = async () => {
+      try {
+        setTransformerError(false);
+
+        const response = await fetch('/api/transformers/count', {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to retrive transformer count: ${response.status}`,
+          );
+        }
+
+        const data: CountResponse = await response.json();
+        setTransformerCount(data.count);
+      } catch (error: unknown) {
+        console.error(error);
+        setTransformerError(true);
+      }
+    };
+
     getPowerCompanyCount();
     getPowerPlantCount();
     getPowerSubstationCount();
+    getTransformerCount();
 
     return () => {
       controller.abort();
@@ -142,7 +168,11 @@ const Dashboard = () => {
     },
     {
       label: 'Transformers',
-      value: '--',
+      value: transformerError
+        ? 'Error'
+        : transformerCount === null
+          ? '--'
+          : transformerCount.toString(),
       description: 'Customer transformers',
     },
   ];
