@@ -128,6 +128,19 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(PowerGridSimulationLogicalException.class)
+    public ResponseEntity<PowerGridSimulationExceptionApiResponse> handleLogicalException(
+            PowerGridSimulationLogicalException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                exception.getMessage(),
+                request.getRequestURI(),
+                Map.of()
+        );
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<PowerGridSimulationExceptionApiResponse> handleValidationErrors(
             MethodArgumentNotValidException exception,
