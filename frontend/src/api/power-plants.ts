@@ -6,12 +6,20 @@ export interface PowerPlant {
   initialBuildCost: number | string;
   recurringGenerationCost: number | string;
   powerProduced: number | string;
+  location: {
+    x: number;
+    y: number;
+  };
 }
 
 export interface UpdatePowerPlantRequest {
   plantId: string;
   initialBuildCost: number;
   recurringGenerationCost: number;
+  location: {
+    x: number;
+    y: number;
+  };
 }
 
 export const getPowerPlants = async (

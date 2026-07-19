@@ -34,6 +34,10 @@ const updatePowerPlantSchema = z.object({
   recurringGenerationCost: z
     .number()
     .min(0, 'Generation cost cannot be negative'),
+
+  x: z.number().int('X coordinate must be an integer'),
+
+  y: z.number().int('Y coordinate must be an integer'),
 });
 
 type UpdatePowerPlantForm = z.infer<typeof updatePowerPlantSchema>;
@@ -63,6 +67,8 @@ export const EditPowerPlantDialog = ({
       plantId: plant.plantId,
       initialBuildCost: Number(plant.initialBuildCost),
       recurringGenerationCost: Number(plant.recurringGenerationCost),
+      x: plant.location.x,
+      y: plant.location.y,
     },
   });
 
@@ -76,6 +82,8 @@ export const EditPowerPlantDialog = ({
         plantId: plant.plantId,
         initialBuildCost: Number(plant.initialBuildCost),
         recurringGenerationCost: Number(plant.recurringGenerationCost),
+        x: plant.location.x,
+        y: plant.location.y,
       });
     }
   };
@@ -87,6 +95,10 @@ export const EditPowerPlantDialog = ({
       plantId: values.plantId,
       initialBuildCost: values.initialBuildCost,
       recurringGenerationCost: values.recurringGenerationCost,
+      location: {
+        x: values.x,
+        y: values.y,
+      },
     };
 
     try {
@@ -215,6 +227,56 @@ export const EditPowerPlantDialog = ({
                 {errors.recurringGenerationCost.message}
               </p>
             )}
+          </div>
+
+          <div className='space-y-3'>
+            <div>
+              <Label>Location</Label>
+
+              <p className='text-sm text-muted-foreground'>
+                Position of the power plant on the simulation grid.
+              </p>
+            </div>
+
+            <div className='grid gap-4 sm:grid-cols-2'>
+              <div className='space-y-2'>
+                <Label htmlFor={`x-${plant.id}`}>X coordinate</Label>
+
+                <Input
+                  id={`x-${plant.id}`}
+                  type='number'
+                  step='1'
+                  aria-invalid={Boolean(errors.x)}
+                  disabled={isSubmitting}
+                  {...register('x', {
+                    valueAsNumber: true,
+                  })}
+                />
+
+                {errors.x && (
+                  <p className='text-sm text-destructive'>{errors.x.message}</p>
+                )}
+              </div>
+
+              <div className='space-y-2'>
+                <Label htmlFor={`y-${plant.id}`}>Y coordinate</Label>
+
+                <Input
+                  id={`y-${plant.id}`}
+                  type='number'
+                  step='1'
+                  aria-invalid={Boolean(errors.y)}
+                  disabled={isSubmitting}
+                  {...register('y', {
+                    valueAsNumber: true,
+                  })}
+                />
+
+                {errors.y && (
+                  <p className='text-sm text-destructive'>{errors.y.message}</p>
+                )}
+              </div>
+            </div>
           </div>
 
           <DialogFooter>

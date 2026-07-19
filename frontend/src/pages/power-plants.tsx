@@ -111,6 +111,18 @@ const PowerPlants = () => {
       ),
     },
     {
+      id: 'location',
+      accessorFn: (plant) =>
+        plant.location ? `${plant.location.x},${plant.location.y}` : '',
+      header: ({ column }) => (
+        <SortableHeader column={column} title='Location' />
+      ),
+      cell: ({ row }) =>
+        row.original.location
+          ? `(${row.original.location.x}, ${row.original.location.y})`
+          : '--',
+    },
+    {
       id: 'actions',
       enableSorting: false,
       header: () => <div className='text-right'>Actions</div>,
