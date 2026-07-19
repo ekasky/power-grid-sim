@@ -4,6 +4,7 @@ import {
   getPowerPlants,
   type PowerPlant,
 } from '@/api/power-plants';
+import { EditPowerPlantDialog } from '@/components/edit-power-plant-dialog';
 import { SortableHeader } from '@/components/sortable-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
@@ -119,6 +120,12 @@ const PowerPlants = () => {
 
         return (
           <div className='flex justify-end'>
+            <EditPowerPlantDialog
+              plant={plant}
+              disabled={isDeleting}
+              onUpdated={handlePowerPlantUpdated}
+            />
+
             <AlertDialog>
               <AlertDialogTrigger
                 render={
@@ -302,6 +309,14 @@ const PowerPlants = () => {
     } finally {
       setDeletingPlantId(null);
     }
+  };
+
+  const handlePowerPlantUpdated = (updatedPlant: PowerPlant) => {
+    setPowerPlants((currentPlants) =>
+      currentPlants.map((plant) =>
+        plant.id === updatedPlant.id ? updatedPlant : plant,
+      ),
+    );
   };
 
   const table = useReactTable({
