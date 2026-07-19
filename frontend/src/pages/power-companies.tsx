@@ -33,6 +33,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { currencyFormatter, rateFormatter } from '@/lib/formatters';
 import {
   flexRender,
   getCoreRowModel,
@@ -46,18 +47,6 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const PowerCompanies = () => {
-  const currencyFormatter = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  });
-
-  const rateFormatter = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 4,
-    maximumFractionDigits: 4,
-  });
-
   const columns: ColumnDef<PowerCompany>[] = [
     {
       accessorKey: 'longName',

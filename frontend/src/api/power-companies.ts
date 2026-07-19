@@ -1,3 +1,5 @@
+import type { ApiErrorResponse } from '@/api/error';
+
 export interface PowerCompany {
   id: string;
   longName: string;
@@ -19,11 +21,6 @@ export interface UpdatePowerCompanyRequest {
     x: number;
     y: number;
   };
-}
-
-export interface ApiErrorResponse {
-  message?: string;
-  details?: string;
 }
 
 export const getPowerCompanies = async (

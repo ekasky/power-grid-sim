@@ -1,0 +1,34 @@
+export interface PowerPlant {
+  id: string;
+  plantId: string;
+  initialBuildCost: number | string;
+  recurringGenerationCost: number | string;
+  powerProduced: number | string;
+}
+
+export const getPowerPlants = async (
+  companyId: string,
+  signal?: AbortSignal,
+): Promise<PowerPlant[]> => {
+  const response = await fetch(`/api/companies/${companyId}/plants`, {
+    method: 'GET',
+    signal,
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to retrieve power plants: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  const data = await response.json();
+
+  if (!Array.isArray(data)) {
+    throw new Error('Invalid response: expected an array of power plants');
+  }
+
+  return data as PowerPlant[];
+};
