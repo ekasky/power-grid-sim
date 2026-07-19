@@ -1,6 +1,21 @@
-import { getPowerCompanies, type PowerCompany } from '@/api/power-companies';
+import {
+  deletePowerCompany,
+  getPowerCompanies,
+  type PowerCompany,
+} from '@/api/power-companies';
 import { SortableHeader } from '@/components/sortable-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -25,7 +40,7 @@ import {
   useReactTable,
   type ColumnDef,
 } from '@tanstack/react-table';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -102,12 +117,102 @@ const PowerCompanies = () => {
           ? `(${row.original.location.x}, ${row.original.location.y})`
           : '',
     },
+    {
+      id: 'actions',
+      enableSorting: false,
+      header: () => <div className='text-right'>Actions</div>,
+      cell: ({ row }) => {
+        const company = row.original;
+        const isDeleting = deletingCompanyId === company.id;
+
+        return (
+          <div className='flex justify-end'>
+            <AlertDialog>
+              <AlertDialogTrigger
+                render={
+                  <Button
+                    type='button'
+                    variant='destructive'
+                    size='sm'
+                    disabled={isDeleting}
+                  />
+                }
+              >
+                {isDeleting ? (
+                  <Loader2 className='size-4 animate-spin' />
+                ) : (
+                  <Trash2 className='size-4' />
+                )}
+
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </AlertDialogTrigger>
+
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    Delete {company.longName}?
+                  </AlertDialogTitle>
+
+                  <AlertDialogDescription>
+                    This action cannot be undone. The power company will be
+                    permanently removed from the simulation.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={isDeleting}>
+                    Cancel
+                  </AlertDialogCancel>
+
+                  <AlertDialogAction
+                    variant='destructive'
+                    disabled={isDeleting}
+                    onClick={() => void handleDeletePowerCompany(company)}
+                  >
+                    {isDeleting ? 'Deleting...' : 'Delete Power Company'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        );
+      },
+    },
   ];
 
   const [powerCompanies, setPowerCompanies] = useState<PowerCompany[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [deletingCompanyId, setDeletingCompanyId] = useState<string | null>(
+    null,
+  );
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const handleDeletePowerCompany = async (company: PowerCompany) => {
+    try {
+      setDeletingCompanyId(company.id);
+      setDeleteError(null);
+
+      await deletePowerCompany(company.id);
+
+      setPowerCompanies((currentCompanies) =>
+        currentCompanies.filter(
+          (currentCompany) => currentCompany.id !== company.id,
+        ),
+      );
+    } catch (error: unknown) {
+      console.error(error);
+
+      setDeleteError(
+        error instanceof Error
+          ? error.message
+          : 'Unable to delete the power company',
+      );
+    } finally {
+      setDeletingCompanyId(null);
+    }
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -189,6 +294,13 @@ const PowerCompanies = () => {
         </CardHeader>
 
         <CardContent>
+          {deleteError && (
+            <Alert variant='destructive' className='mb-4'>
+              <AlertTitle>Unable to delete power company</AlertTitle>
+              <AlertDescription>{deleteError}</AlertDescription>
+            </Alert>
+          )}
+
           {isLoading ? (
             <div className='flex min-h-48 items-center justify-center gap-2 text-muted-foreground'>
               <Loader2 className='size-5 animate-spin' />

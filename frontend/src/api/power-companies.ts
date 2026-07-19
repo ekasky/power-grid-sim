@@ -11,6 +11,11 @@ export interface PowerCompany {
   };
 }
 
+export interface ApiErrorResponse {
+  message?: string;
+  details?: string;
+}
+
 export const getPowerCompanies = async (
   signal?: AbortSignal,
 ): Promise<PowerCompany[]> => {
@@ -35,4 +40,22 @@ export const getPowerCompanies = async (
   }
 
   return data as PowerCompany[];
+};
+
+export const deletePowerCompany = async (companyId: string): Promise<void> => {
+  const response = await fetch(`/api/companies/${companyId}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    const errorBody = (await response
+      .json()
+      .catch(() => null)) as ApiErrorResponse | null;
+
+    throw new Error(
+      errorBody?.message ??
+        errorBody?.details ??
+        `Failed to delete power company: ${response.status}`,
+    );
+  }
 };
