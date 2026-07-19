@@ -3,6 +3,7 @@ import {
   getPowerCompanies,
   type PowerCompany,
 } from '@/api/power-companies';
+import { EditPowerCompanyDialog } from '@/components/edit-power-company-dialog';
 import { SortableHeader } from '@/components/sortable-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
@@ -126,7 +127,12 @@ const PowerCompanies = () => {
         const isDeleting = deletingCompanyId === company.id;
 
         return (
-          <div className='flex justify-end'>
+          <div className='flex justify-end gap-2'>
+            <EditPowerCompanyDialog
+              company={company}
+              onUpdated={handlePowerCompanyUpdated}
+            />
+
             <AlertDialog>
               <AlertDialogTrigger
                 render={
@@ -212,6 +218,14 @@ const PowerCompanies = () => {
     } finally {
       setDeletingCompanyId(null);
     }
+  };
+
+  const handlePowerCompanyUpdated = (updatedCompany: PowerCompany) => {
+    setPowerCompanies((currentCompanies) =>
+      currentCompanies.map((company) =>
+        company.id === updatedCompany.id ? updatedCompany : company,
+      ),
+    );
   };
 
   useEffect(() => {

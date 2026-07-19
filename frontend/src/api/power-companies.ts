@@ -11,6 +11,16 @@ export interface PowerCompany {
   };
 }
 
+export interface UpdatePowerCompanyRequest {
+  longName: string;
+  shortName: string;
+  standardRate: number;
+  location: {
+    x: number;
+    y: number;
+  };
+}
+
 export interface ApiErrorResponse {
   message?: string;
   details?: string;
@@ -58,4 +68,34 @@ export const deletePowerCompany = async (companyId: string): Promise<void> => {
         `Failed to delete power company: ${response.status}`,
     );
   }
+};
+
+export const updatePowerCompany = async (
+  companyId: string,
+  request: UpdatePowerCompanyRequest,
+): Promise<PowerCompany> => {
+  const response = await fetch(`/api/companies/${companyId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const errorBody = (await response
+      .json()
+      .catch(() => null)) as ApiErrorResponse | null;
+
+    throw new Error(
+      errorBody?.message ??
+        errorBody?.details ??
+        `Failed to update power company: ${response.status}`,
+    );
+  }
+
+  const data = await response.json();
+
+  return data as PowerCompany;
 };
