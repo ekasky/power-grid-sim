@@ -1,7 +1,22 @@
 import { getPowerCompanies, type PowerCompany } from '@/api/power-companies';
-import { getPowerPlants, type PowerPlant } from '@/api/power-plants';
+import {
+  deletePowerPlant,
+  getPowerPlants,
+  type PowerPlant,
+} from '@/api/power-plants';
 import { SortableHeader } from '@/components/sortable-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -34,7 +49,7 @@ import {
   type ColumnDef,
   type SortingState,
 } from '@tanstack/react-table';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -50,6 +65,9 @@ const PowerPlants = () => {
 
   const [companyError, setCompanyError] = useState<string | null>(null);
   const [plantError, setPlantError] = useState<string | null>(null);
+
+  const [deletingPlantId, setDeletingPlantId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const columns: ColumnDef<PowerPlant>[] = [
     {
@@ -90,6 +108,65 @@ const PowerPlants = () => {
           {energyFormatter.format(Number(row.original.powerProduced))} kWh
         </span>
       ),
+    },
+    {
+      id: 'actions',
+      enableSorting: false,
+      header: () => <div className='text-right'>Actions</div>,
+      cell: ({ row }) => {
+        const plant = row.original;
+        const isDeleting = deletingPlantId === plant.id;
+
+        return (
+          <div className='flex justify-end'>
+            <AlertDialog>
+              <AlertDialogTrigger
+                render={
+                  <Button
+                    type='button'
+                    variant='destructive'
+                    size='sm'
+                    disabled={isDeleting}
+                  />
+                }
+              >
+                {isDeleting ? (
+                  <Loader2 className='size-4 animate-spin' />
+                ) : (
+                  <Trash2 className='size-4' />
+                )}
+
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </AlertDialogTrigger>
+
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete {plant.plantId}?</AlertDialogTitle>
+
+                  <AlertDialogDescription>
+                    This action cannot be undone. The power plant will be
+                    permanently removed from {selectedCompany?.longName}.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={isDeleting}>
+                    Cancel
+                  </AlertDialogCancel>
+
+                  <AlertDialogAction
+                    variant='destructive'
+                    disabled={isDeleting}
+                    onClick={() => void handleDeletePowerPlant(plant)}
+                  >
+                    {isDeleting ? 'Deleting...' : 'Delete Power Plant'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        );
+      },
     },
   ];
 
@@ -199,6 +276,34 @@ const PowerPlants = () => {
     (company) => company.id === selectedCompanyId,
   );
 
+  const handleDeletePowerPlant = async (plant: PowerPlant) => {
+    if (!selectedCompanyId) {
+      setDeleteError('Select a power company before deleting a plant.');
+      return;
+    }
+
+    try {
+      setDeletingPlantId(plant.id);
+      setDeleteError(null);
+
+      await deletePowerPlant(plant.id);
+
+      setPowerPlants((currentPlants) =>
+        currentPlants.filter((currentPlant) => currentPlant.id !== plant.id),
+      );
+    } catch (error: unknown) {
+      console.error(error);
+
+      setDeleteError(
+        error instanceof Error
+          ? error.message
+          : 'Unable to delete the power plant.',
+      );
+    } finally {
+      setDeletingPlantId(null);
+    }
+  };
+
   const table = useReactTable({
     data: powerPlants,
     columns,
@@ -267,6 +372,13 @@ const PowerPlants = () => {
         </CardHeader>
 
         <CardContent>
+          {deleteError && (
+            <Alert variant='destructive' className='mb-4'>
+              <AlertTitle>Unable to delete power plant</AlertTitle>
+              <AlertDescription>{deleteError}</AlertDescription>
+            </Alert>
+          )}
+
           {companyError && (
             <Alert variant='destructive' className='mb-4'>
               <AlertTitle>Unable to load power companies</AlertTitle>

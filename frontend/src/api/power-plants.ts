@@ -1,3 +1,5 @@
+import type { ApiErrorResponse } from '@/api/error';
+
 export interface PowerPlant {
   id: string;
   plantId: string;
@@ -31,4 +33,23 @@ export const getPowerPlants = async (
   }
 
   return data as PowerPlant[];
+};
+
+export const deletePowerPlant = async (powerPlantId: string): Promise<void> => {
+  const response = await fetch(`/api/plants/${powerPlantId}`, {
+    method: 'DELETE',
+    headers: {
+      Accept: 'applicaiton/json',
+    },
+  });
+
+  if (!response.ok) {
+    const errorBody = (await response
+      .json()
+      .catch(() => null)) as ApiErrorResponse | null;
+
+    throw new Error(
+      errorBody?.message || `Failed to delete power plant: ${response.status}`,
+    );
+  }
 };
