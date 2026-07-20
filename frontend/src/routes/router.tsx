@@ -3,6 +3,7 @@ import CreatePowerCompany from '@/pages/create-power-company';
 import CreatePowerPlant from '@/pages/create-power-plant';
 import CreatePowerSubstation from '@/pages/create-power-substation';
 import CreateTransformer from '@/pages/create-transformer';
+import { Customers } from '@/pages/customers';
 import Dashboard from '@/pages/Dashboard';
 import PowerCompanies from '@/pages/power-companies';
 import PowerPlants from '@/pages/power-plants';
@@ -50,6 +51,10 @@ export const router = createBrowserRouter([
       {
         path: '/transformers',
         element: <Transformers />,
+      },
+      {
+        path: '/customers',
+        element: <Customers />,
       },
     ],
   },
