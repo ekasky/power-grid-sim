@@ -46,7 +46,7 @@ public class CustomerService {
 
     @Transactional(readOnly = true)
     public List<Customer> getAllPowerCompanyCustomers(UUID powerCompanyId) {
-        return customerRepo.findAllByTransformerPowerSubstationPowerPlantId(powerCompanyId);
+        return customerRepo.findAllByTransformer_PowerSubstation_PowerPlant_Company_Id(powerCompanyId);
     }
 
     @Transactional

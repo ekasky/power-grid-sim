@@ -14,6 +14,6 @@ public interface CustomerRepo extends JpaRepository<Customer, UUID> {
     Optional<Customer> findByAccountNumber(String accountNumber);
     List<Customer> findAllByTransformerId(UUID transformerId);
     long countByTransformerId(UUID transformerId);
-    List<Customer> findAllByTransformerPowerSubstationPowerPlantId(UUID powerPlantId);
+    List<Customer> findAllByTransformer_PowerSubstation_PowerPlant_Company_Id(UUID powerPlantId);
 
 }
