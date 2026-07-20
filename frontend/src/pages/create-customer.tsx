@@ -1,6 +1,7 @@
 import { FormError } from '@/components/form-error';
 import { SelectPowerCompany } from '@/components/select-power-company';
 import { SelectPowerPlants } from '@/components/select-power-plant';
+import { SelectSubstation } from '@/components/select-substation';
 import {
   Card,
   CardContent,
@@ -10,6 +11,7 @@ import {
 } from '@/components/ui/card';
 import { usePowerCompanies } from '@/hooks/use-power-companies';
 import { usePowerPlants } from '@/hooks/use-power-plants';
+import { useSubstation } from '@/hooks/use-substation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -44,6 +46,7 @@ const CreateCustomer = () => {
   const powerPlantsState = usePowerPlants(
     powerCompaniesState.selectedPowerCompanyId,
   );
+  const substationState = useSubstation(powerPlantsState.selectedPowerPlantId);
 
   const {
     //register,
@@ -102,6 +105,13 @@ const CreateCustomer = () => {
               />
             )}
 
+            {substationState.substationError && (
+              <FormError
+                title='Unable to load substations'
+                error={substationState.substationError}
+              />
+            )}
+
             {submitError && (
               <FormError
                 title='Unable to create customer'
@@ -126,6 +136,11 @@ const CreateCustomer = () => {
 
                 <SelectPowerPlants
                   {...powerPlantsState}
+                  isSubmitting={isSubmitting}
+                />
+
+                <SelectSubstation
+                  {...substationState}
                   isSubmitting={isSubmitting}
                 />
               </div>
