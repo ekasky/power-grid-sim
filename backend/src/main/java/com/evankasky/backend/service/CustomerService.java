@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class CustomerService {
@@ -35,6 +36,10 @@ public class CustomerService {
         return customerRepo.count();
     }
 
+    @Transactional(readOnly = true)
+    public List<Customer> getAllPowerCompanyCustomers(UUID powerCompanyId) {
+        return customerRepo.findAllByTransformerPowerSubstationPowerPlantId(powerCompanyId);
+    }
 
     /* *****************************************************************************************************************
      *                                              Helper Methods
