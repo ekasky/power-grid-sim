@@ -1,8 +1,12 @@
 package com.evankasky.backend.service;
 
 import com.evankasky.backend.dto.customer.CustomerResponse;
+import com.evankasky.backend.model.Customer;
 import com.evankasky.backend.repository.CustomerRepo;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class CustomerService {
@@ -21,7 +25,10 @@ public class CustomerService {
      *                                        Customer Service Methods
      ***************************************************************************************************************** */
 
-
+    @Transactional(readOnly = true)
+    public List<Customer> getAllCustomers() {
+        return customerRepo.findAll();
+    }
 
     /* *****************************************************************************************************************
      *                                              Helper Methods
