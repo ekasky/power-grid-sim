@@ -113,3 +113,38 @@ export const deleteTransformer = async (
     );
   }
 };
+
+export const createTransformer = async (
+  substationId: string,
+  request: CreateTransformerRequest,
+): Promise<Transformer> => {
+  const response = await fetch(
+    `/api/substations/${substationId}/transformers`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(request),
+    },
+  );
+
+  if (!response.ok) {
+    const errorBody = (await response
+      .json()
+      .catch(() => null)) as ApiErrorResponse | null;
+
+    throw new Error(
+      errorBody?.message ?? `Failed to create transformer: ${response.status}`,
+    );
+  }
+
+  const data = await response.json();
+
+  if (!data) {
+    throw new Error('Invalid transformer response');
+  }
+
+  return data as Transformer;
+};

@@ -1,11 +1,9 @@
-import { useEffect, useState } from 'react';
-import { Controller, useForm, useWatch } from 'react-hook-form';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { z } from 'zod';
-
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -17,21 +15,19 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { usePowerCompanies } from '@/hooks/use-power-companies';
+import { usePowerPlants } from '@/hooks/use-power-plants';
+import { useSubstation } from '@/hooks/use-substation';
+import { FormError } from '@/components/form-error';
+import { SelectPowerCompany } from '@/components/select-power-company';
+import { SelectPowerPlants } from '@/components/select-power-plant';
+import { SelectSubstation } from '@/components/select-substation';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  createTransformer,
+  type CreateTransformerRequest,
+} from '@/api/transformers';
 
 const createTransformerSchema = z.object({
-  companyId: z.string().min(1, 'Power company is required'),
-
-  powerPlantId: z.string().min(1, 'Power plant is required'),
-
-  substationId: z.string().min(1, 'Power substation is required'),
-
   transformerId: z
     .string()
     .trim()
@@ -53,70 +49,24 @@ const createTransformerSchema = z.object({
 
 type CreateTransformerForm = z.infer<typeof createTransformerSchema>;
 
-interface PowerCompany {
-  id: string;
-  longName: string;
-  shortName: string;
-}
-
-interface PowerPlant {
-  id: string;
-  plantId: string;
-}
-
-interface PowerSubstation {
-  id: string;
-  substationId: string;
-}
-
-interface CreateTransformerRequest {
-  transformerId: string;
-  initialInstallationCost: number;
-  recurringMaintenanceCost: number;
-  location: {
-    x: number;
-    y: number;
-  };
-}
-
-interface ApiErrorResponse {
-  message?: string;
-  details?: string;
-}
-
-const isAbortError = (error: unknown) =>
-  error instanceof DOMException && error.name === 'AbortError';
-
 const CreateTransformer = () => {
   const navigate = useNavigate();
 
-  const [powerCompanies, setPowerCompanies] = useState<PowerCompany[]>([]);
-  const [powerPlants, setPowerPlants] = useState<PowerPlant[]>([]);
-  const [powerSubstations, setPowerSubstations] = useState<PowerSubstation[]>(
-    [],
+  const powerCompaniesState = usePowerCompanies();
+  const powerPlantsState = usePowerPlants(
+    powerCompaniesState.selectedPowerCompanyId,
   );
+  const substationsState = useSubstation(powerPlantsState.selectedPowerPlantId);
 
-  const [companiesLoading, setCompaniesLoading] = useState(true);
-  const [plantsLoading, setPlantsLoading] = useState(false);
-  const [substationsLoading, setSubstationsLoading] = useState(false);
-
-  const [companiesError, setCompaniesError] = useState<string | null>(null);
-  const [plantsError, setPlantsError] = useState<string | null>(null);
-  const [substationsError, setSubstationsError] = useState<string | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
-    control,
     handleSubmit,
-    setValue,
     formState: { errors, isSubmitting },
   } = useForm<CreateTransformerForm>({
     resolver: zodResolver(createTransformerSchema),
     defaultValues: {
-      companyId: '',
-      powerPlantId: '',
-      substationId: '',
       transformerId: '',
       initialInstallationCost: 0,
       recurringMaintenanceCost: 0,
@@ -125,191 +75,16 @@ const CreateTransformer = () => {
     },
   });
 
-  const selectedCompanyId = useWatch({
-    control,
-    name: 'companyId',
-  });
-
-  const selectedPowerPlantId = useWatch({
-    control,
-    name: 'powerPlantId',
-  });
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    const getPowerCompanies = async () => {
-      try {
-        const response = await fetch('/api/companies', {
-          signal: controller.signal,
-        });
-
-        if (!response.ok) {
-          throw new Error(
-            `Failed to retrieve power companies: ${response.status}`,
-          );
-        }
-
-        const data: PowerCompany[] = await response.json();
-
-        if (!controller.signal.aborted) {
-          setPowerCompanies(data);
-          setCompaniesError(null);
-        }
-      } catch (error: unknown) {
-        if (isAbortError(error)) {
-          return;
-        }
-
-        console.error(error);
-
-        setCompaniesError(
-          error instanceof Error
-            ? error.message
-            : 'Unable to load power companies',
-        );
-      } finally {
-        if (!controller.signal.aborted) {
-          setCompaniesLoading(false);
-        }
-      }
-    };
-
-    void getPowerCompanies();
-
-    return () => {
-      controller.abort();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!selectedCompanyId) {
-      return;
-    }
-
-    const controller = new AbortController();
-
-    const getPowerPlants = async () => {
-      try {
-        const response = await fetch(
-          `/api/companies/${selectedCompanyId}/plants`,
-          {
-            signal: controller.signal,
-          },
-        );
-
-        if (!response.ok) {
-          throw new Error(
-            `Failed to retrieve power plants: ${response.status}`,
-          );
-        }
-
-        const data: PowerPlant[] = await response.json();
-
-        if (!controller.signal.aborted) {
-          setPowerPlants(data);
-          setPlantsError(null);
-        }
-      } catch (error: unknown) {
-        if (isAbortError(error)) {
-          return;
-        }
-
-        console.error(error);
-
-        setPlantsError(
-          error instanceof Error
-            ? error.message
-            : 'Unable to load power plants',
-        );
-      } finally {
-        if (!controller.signal.aborted) {
-          setPlantsLoading(false);
-        }
-      }
-    };
-
-    void getPowerPlants();
-
-    return () => {
-      controller.abort();
-    };
-  }, [selectedCompanyId]);
-
-  useEffect(() => {
-    if (!selectedPowerPlantId) {
-      return;
-    }
-
-    const controller = new AbortController();
-
-    const getPowerSubstations = async () => {
-      try {
-        const response = await fetch(
-          `/api/plants/${selectedPowerPlantId}/substations`,
-          {
-            signal: controller.signal,
-          },
-        );
-
-        if (!response.ok) {
-          throw new Error(
-            `Failed to retrieve power substations: ${response.status}`,
-          );
-        }
-
-        const data: PowerSubstation[] = await response.json();
-
-        if (!controller.signal.aborted) {
-          setPowerSubstations(data);
-          setSubstationsError(null);
-        }
-      } catch (error: unknown) {
-        if (isAbortError(error)) {
-          return;
-        }
-
-        console.error(error);
-
-        setSubstationsError(
-          error instanceof Error
-            ? error.message
-            : 'Unable to load power substations',
-        );
-      } finally {
-        if (!controller.signal.aborted) {
-          setSubstationsLoading(false);
-        }
-      }
-    };
-
-    void getPowerSubstations();
-
-    return () => {
-      controller.abort();
-    };
-  }, [selectedPowerPlantId, selectedCompanyId]);
-
-  const companyOptions = powerCompanies.map((company) => ({
-    value: company.id,
-    label: company.longName,
-  }));
-
-  const plantOptions = powerPlants.map((plant) => ({
-    value: plant.id,
-    label: plant.plantId,
-  }));
-
-  const substationOptions = powerSubstations.map((substation) => ({
-    value: substation.id,
-    label: substation.substationId,
-  }));
-
   const onSubmit = async (values: CreateTransformerForm) => {
-    setFormError(null);
+    const substationId = substationsState.selectedSubstationId;
+
+    if (!substationId) {
+      setSubmitError('Select a substation before creating a new transformer');
+      return;
+    }
 
     const request: CreateTransformerRequest = {
-      transformerId: values.transformerId,
+      transformerId: values.transformerId.trim(),
       initialInstallationCost: values.initialInstallationCost,
       recurringMaintenanceCost: values.recurringMaintenanceCost,
       location: {
@@ -319,38 +94,23 @@ const CreateTransformer = () => {
     };
 
     try {
-      const response = await fetch(
-        `/api/substations/${values.substationId}/transformers`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(request),
-        },
-      );
-
-      if (!response.ok) {
-        const errorBody = (await response
-          .json()
-          .catch(() => null)) as ApiErrorResponse | null;
-
-        throw new Error(
-          errorBody?.message ??
-            errorBody?.details ??
-            `Failed to create transformer: ${response.status}`,
-        );
-      }
+      setSubmitError(null);
+      await createTransformer(substationId, request);
 
       navigate('/');
     } catch (error: unknown) {
       console.error(error);
 
-      setFormError(
-        error instanceof Error ? error.message : 'An unexpected error occurred',
+      setSubmitError(
+        error instanceof Error ? error.message : 'Unable to create transformer',
       );
     }
   };
+
+  const isLoadingHierarchy =
+    powerCompaniesState.isLoadingPowerCompanies ||
+    powerPlantsState.isLoadingPowerPlants ||
+    substationsState.isLoadingSubstations;
 
   return (
     <div className='mx-auto w-full max-w-2xl py-4'>
@@ -376,219 +136,54 @@ const CreateTransformer = () => {
           </CardHeader>
 
           <CardContent className='space-y-7 px-8 pb-8'>
-            {formError && (
-              <Alert variant='destructive'>
-                <AlertCircle className='size-4' />
-                <AlertTitle>Unable to create transformer</AlertTitle>
-                <AlertDescription>{formError}</AlertDescription>
-              </Alert>
-            )}
-
-            {companiesError && (
-              <Alert variant='destructive'>
-                <AlertCircle className='size-4' />
-                <AlertTitle>Unable to load companies</AlertTitle>
-                <AlertDescription>{companiesError}</AlertDescription>
-              </Alert>
-            )}
-
-            {plantsError && (
-              <Alert variant='destructive'>
-                <AlertCircle className='size-4' />
-                <AlertTitle>Unable to load power plants</AlertTitle>
-                <AlertDescription>{plantsError}</AlertDescription>
-              </Alert>
-            )}
-
-            {substationsError && (
-              <Alert variant='destructive'>
-                <AlertCircle className='size-4' />
-                <AlertTitle>Unable to load substations</AlertTitle>
-                <AlertDescription>{substationsError}</AlertDescription>
-              </Alert>
-            )}
-
-            <div className='space-y-3'>
-              <Label htmlFor='companyId'>Power company</Label>
-
-              <Controller
-                name='companyId'
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    items={companyOptions}
-                    value={field.value}
-                    onValueChange={(companyId) => {
-                      field.onChange(companyId);
-
-                      setValue('powerPlantId', '');
-                      setValue('substationId', '');
-
-                      setPowerPlants([]);
-                      setPowerSubstations([]);
-
-                      setPlantsError(null);
-                      setSubstationsError(null);
-
-                      setPlantsLoading(true);
-                      setSubstationsLoading(false);
-                    }}
-                    disabled={
-                      companiesLoading ||
-                      Boolean(companiesError) ||
-                      powerCompanies.length === 0
-                    }
-                  >
-                    <SelectTrigger
-                      id='companyId'
-                      className='h-11 w-full'
-                      aria-invalid={Boolean(errors.companyId)}
-                    >
-                      <SelectValue
-                        placeholder={
-                          companiesLoading
-                            ? 'Loading power companies...'
-                            : powerCompanies.length === 0
-                              ? 'No power companies available'
-                              : 'Select a power company'
-                        }
-                      />
-                    </SelectTrigger>
-
-                    <SelectContent>
-                      {powerCompanies.map((company) => (
-                        <SelectItem key={company.id} value={company.id}>
-                          {company.longName} ({company.shortName})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
+            {submitError && (
+              <FormError
+                title='Unable to create transformer'
+                error={submitError}
               />
+            )}
 
-              {errors.companyId && (
-                <p className='text-sm text-destructive'>
-                  {errors.companyId.message}
-                </p>
-              )}
+            {powerCompaniesState.powerCompanyError && (
+              <FormError
+                title='Unable to load power companies'
+                error={powerCompaniesState.powerCompanyError}
+              />
+            )}
+
+            {powerPlantsState.powerPlantError && (
+              <FormError
+                title='Unable to load power plants'
+                error={powerPlantsState.powerPlantError}
+              />
+            )}
+
+            {substationsState.substationError && (
+              <FormError
+                title='Unable to load substations'
+                error={substationsState.substationError}
+              />
+            )}
+
+            <div className='space-y-4'>
+              <div className='grid gap-4 sm:grid-cols-2'>
+                <SelectPowerCompany
+                  {...powerCompaniesState}
+                  isSubmitting={isSubmitting}
+                />
+
+                <SelectPowerPlants
+                  {...powerPlantsState}
+                  isSubmitting={isSubmitting}
+                />
+
+                <SelectSubstation
+                  {...substationsState}
+                  isSubmitting={isSubmitting}
+                />
+              </div>
             </div>
 
-            <div className='space-y-3'>
-              <Label htmlFor='powerPlantId'>Power plant</Label>
-
-              <Controller
-                name='powerPlantId'
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    items={plantOptions}
-                    value={field.value}
-                    onValueChange={(powerPlantId) => {
-                      field.onChange(powerPlantId);
-
-                      setValue('substationId', '');
-                      setPowerSubstations([]);
-                      setSubstationsError(null);
-                      setSubstationsLoading(true);
-                    }}
-                    disabled={
-                      !selectedCompanyId ||
-                      plantsLoading ||
-                      Boolean(plantsError) ||
-                      powerPlants.length === 0
-                    }
-                  >
-                    <SelectTrigger
-                      id='powerPlantId'
-                      className='h-11 w-full'
-                      aria-invalid={Boolean(errors.powerPlantId)}
-                    >
-                      <SelectValue
-                        placeholder={
-                          !selectedCompanyId
-                            ? 'Select a power company first'
-                            : plantsLoading
-                              ? 'Loading power plants...'
-                              : powerPlants.length === 0
-                                ? 'No power plants available'
-                                : 'Select a power plant'
-                        }
-                      />
-                    </SelectTrigger>
-
-                    <SelectContent>
-                      {powerPlants.map((plant) => (
-                        <SelectItem key={plant.id} value={plant.id}>
-                          {plant.plantId}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-
-              {errors.powerPlantId && (
-                <p className='text-sm text-destructive'>
-                  {errors.powerPlantId.message}
-                </p>
-              )}
-            </div>
-
-            <div className='space-y-3'>
-              <Label htmlFor='substationId'>Power substation</Label>
-
-              <Controller
-                name='substationId'
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    items={substationOptions}
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={
-                      !selectedPowerPlantId ||
-                      substationsLoading ||
-                      Boolean(substationsError) ||
-                      powerSubstations.length === 0
-                    }
-                  >
-                    <SelectTrigger
-                      id='substationId'
-                      className='h-11 w-full'
-                      aria-invalid={Boolean(errors.substationId)}
-                    >
-                      <SelectValue
-                        placeholder={
-                          !selectedPowerPlantId
-                            ? 'Select a power plant first'
-                            : substationsLoading
-                              ? 'Loading substations...'
-                              : powerSubstations.length === 0
-                                ? 'No substations available'
-                                : 'Select a power substation'
-                        }
-                      />
-                    </SelectTrigger>
-
-                    <SelectContent>
-                      {powerSubstations.map((substation) => (
-                        <SelectItem key={substation.id} value={substation.id}>
-                          {substation.substationId}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-
-              {errors.substationId && (
-                <p className='text-sm text-destructive'>
-                  {errors.substationId.message}
-                </p>
-              )}
-            </div>
-
-            <div className='space-y-3'>
+            <div className='space-y-4'>
               <Label htmlFor='transformerId'>Transformer ID</Label>
 
               <Input
@@ -737,12 +332,8 @@ const CreateTransformer = () => {
               type='submit'
               disabled={
                 isSubmitting ||
-                companiesLoading ||
-                plantsLoading ||
-                substationsLoading ||
-                !selectedCompanyId ||
-                !selectedPowerPlantId ||
-                powerSubstations.length === 0
+                isLoadingHierarchy ||
+                !substationsState.selectedSubstationId
               }
             >
               {isSubmitting && <Loader2 className='size-4 animate-spin' />}
