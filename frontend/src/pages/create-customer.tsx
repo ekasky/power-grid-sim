@@ -1,5 +1,6 @@
 import { FormError } from '@/components/form-error';
 import { SelectPowerCompany } from '@/components/select-power-company';
+import { SelectPowerPlants } from '@/components/select-power-plant';
 import {
   Card,
   CardContent,
@@ -8,6 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { usePowerCompanies } from '@/hooks/use-power-companies';
+import { usePowerPlants } from '@/hooks/use-power-plants';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -39,12 +41,15 @@ const CreateCustomer = () => {
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const powerCompaniesState = usePowerCompanies();
+  const powerPlantsState = usePowerPlants(
+    powerCompaniesState.selectedPowerCompanyId,
+  );
 
   const {
-    register,
-    control,
+    //register,
+    //control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { /*errors,*/ isSubmitting },
   } = useForm<CreateCustomerForm>({
     resolver: zodResolver(createCustomerSchema),
     defaultValues: {
@@ -85,8 +90,15 @@ const CreateCustomer = () => {
           <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
             {powerCompaniesState.powerCompanyError && (
               <FormError
-                title='Unable to load power grid'
+                title='Unable to load power companies'
                 error={powerCompaniesState.powerCompanyError}
+              />
+            )}
+
+            {powerPlantsState.powerPlantError && (
+              <FormError
+                title='Unable to load power plants'
+                error={powerPlantsState.powerPlantError}
               />
             )}
 
@@ -109,6 +121,11 @@ const CreateCustomer = () => {
               <div className='grid gap-4 sm:grid-cols-2'>
                 <SelectPowerCompany
                   {...powerCompaniesState}
+                  isSubmitting={isSubmitting}
+                />
+
+                <SelectPowerPlants
+                  {...powerPlantsState}
                   isSubmitting={isSubmitting}
                 />
               </div>
