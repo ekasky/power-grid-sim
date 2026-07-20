@@ -1,4 +1,8 @@
-import type { CustomerType } from '@/api/customer';
+import {
+  createCustomer,
+  type CreateCustomerRequest,
+  type CustomerType,
+} from '@/api/customer';
 import { FormError } from '@/components/form-error';
 import { SelectPowerCompany } from '@/components/select-power-company';
 import { SelectPowerPlants } from '@/components/select-power-plant';
@@ -98,10 +102,36 @@ const CreateCustomer = () => {
     },
   });
 
-  const onSubmit = (values: CreateCustomerForm) => {
-    // temp
-    console.log(values);
-    setSubmitError(null);
+  const onSubmit = async (values: CreateCustomerForm) => {
+    const transformerId = transformersState.selectedTransformerId;
+
+    if (!transformerId) {
+      setSubmitError('Select a transformer before creating a new customer.');
+      return;
+    }
+
+    const request: CreateCustomerRequest = {
+      accountNumber: values.accountNumber.trim(),
+      name: values.name.trim(),
+      customerType: values.customerType,
+      location: {
+        x: values.x,
+        y: values.y,
+      },
+    };
+
+    try {
+      setSubmitError(null);
+      await createCustomer(transformerId, request);
+
+      navigate('/');
+    } catch (error: unknown) {
+      console.error(error);
+
+      setSubmitError(
+        error instanceof Error ? error.message : 'Unable to create customer',
+      );
+    }
   };
 
   const isLoadingHierarchy =
