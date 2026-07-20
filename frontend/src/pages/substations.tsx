@@ -5,20 +5,10 @@ import {
   getPowerSubstations,
   type PowerSubstation,
 } from '@/api/power-substations';
+import { DeleteActionDialog } from '@/components/delete-action-dialog';
 import { EditPowerSubstationDialog } from '@/components/edit-power-substation-dialog';
 import { SortableHeader } from '@/components/sortable-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -51,7 +41,7 @@ import {
   type ColumnDef,
   type SortingState,
 } from '@tanstack/react-table';
-import { Loader2, Trash2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -175,54 +165,19 @@ const Substations = () => {
               onUpdated={handlePowerSubstationUpdated}
             />
 
-            <AlertDialog>
-              <AlertDialogTrigger
-                render={
-                  <Button
-                    type='button'
-                    variant='destructive'
-                    size='sm'
-                    disabled={isDeleting}
-                  />
-                }
-              >
-                {isDeleting ? (
-                  <Loader2 className='size-4 animate-spin' />
-                ) : (
-                  <Trash2 className='size-4' />
-                )}
-
-                {isDeleting ? 'Deleting...' : 'Delete'}
-              </AlertDialogTrigger>
-
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    Delete {substation.substationId}?
-                  </AlertDialogTitle>
-
-                  <AlertDialogDescription>
-                    This action cannot be undone. The substation will be
-                    permanently removed from{' '}
-                    {selectedPlant?.plantId ?? 'the power plant'}.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-
-                <AlertDialogFooter>
-                  <AlertDialogCancel disabled={isDeleting}>
-                    Cancel
-                  </AlertDialogCancel>
-
-                  <AlertDialogAction
-                    variant='destructive'
-                    disabled={isDeleting}
-                    onClick={() => void handleDeleteSubstation(substation)}
-                  >
-                    {isDeleting ? 'Deleting...' : 'Delete Substation'}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <DeleteActionDialog
+              title={`Delete ${substation.substationId}?`}
+              description={
+                <>
+                  This action cannot be undone. The substation will be
+                  permanently removed from{' '}
+                  {selectedPlant?.plantId ?? 'the power plant'}.
+                </>
+              }
+              confirmLabel='Delete Substation'
+              isDeleting={isDeleting}
+              onConfirm={() => handleDeleteSubstation(substation)}
+            />
           </div>
         );
       },

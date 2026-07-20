@@ -3,20 +3,10 @@ import {
   getPowerCompanies,
   type PowerCompany,
 } from '@/api/power-companies';
+import { DeleteActionDialog } from '@/components/delete-action-dialog';
 import { EditPowerCompanyDialog } from '@/components/edit-power-company-dialog';
 import { SortableHeader } from '@/components/sortable-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -42,7 +32,7 @@ import {
   useReactTable,
   type ColumnDef,
 } from '@tanstack/react-table';
-import { Loader2, Trash2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -122,53 +112,19 @@ const PowerCompanies = () => {
               onUpdated={handlePowerCompanyUpdated}
             />
 
-            <AlertDialog>
-              <AlertDialogTrigger
-                render={
-                  <Button
-                    type='button'
-                    variant='destructive'
-                    size='sm'
-                    disabled={isDeleting}
-                  />
-                }
-              >
-                {isDeleting ? (
-                  <Loader2 className='size-4 animate-spin' />
-                ) : (
-                  <Trash2 className='size-4' />
-                )}
-
-                {isDeleting ? 'Deleting...' : 'Delete'}
-              </AlertDialogTrigger>
-
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    Delete {company.longName}?
-                  </AlertDialogTitle>
-
-                  <AlertDialogDescription>
-                    This action cannot be undone. The power company will be
-                    permanently removed from the simulation.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-
-                <AlertDialogFooter>
-                  <AlertDialogCancel disabled={isDeleting}>
-                    Cancel
-                  </AlertDialogCancel>
-
-                  <AlertDialogAction
-                    variant='destructive'
-                    disabled={isDeleting}
-                    onClick={() => void handleDeletePowerCompany(company)}
-                  >
-                    {isDeleting ? 'Deleting...' : 'Delete Power Company'}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <DeleteActionDialog
+              title={`Delete ${company.id}?`}
+              description={
+                <>
+                  This action cannot be undone. The power plant will be
+                  permanently removed from{' '}
+                  {company.longName ?? 'the power company'}.
+                </>
+              }
+              confirmLabel='Delete Power Plant'
+              isDeleting={isDeleting}
+              onConfirm={() => handleDeletePowerCompany(company)}
+            />
           </div>
         );
       },
