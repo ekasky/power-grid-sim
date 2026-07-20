@@ -69,7 +69,7 @@ export const updateTransformer = async (
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
-      Accept: 'applicaiton/json',
+      Accept: 'application/json',
     },
     body: JSON.stringify(request),
   });
