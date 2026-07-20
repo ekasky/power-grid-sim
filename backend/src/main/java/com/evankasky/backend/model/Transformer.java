@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -38,6 +40,9 @@ public class Transformer {
     @JoinColumn(name = "power_substation_id", nullable = false)
     private PowerSubstation powerSubstation;
 
+    @OneToMany(mappedBy = "transformer")
+    private List<Customer> customers = new ArrayList<>();
+
     /* *****************************************************************************************************************
      *                                                  Constructors
      ***************************************************************************************************************** */
@@ -60,7 +65,15 @@ public class Transformer {
      *                                             Transformer Methods
      ***************************************************************************************************************** */
 
+    public void addCustomer(Customer customer) {
+        customers.add(customer);
+        customer.setTransformer(this);
+    }
 
+    public void deleteCustomer(Customer customer) {
+        customers.remove(customer);
+        customer.setTransformer(null);
+    }
 
     /* *****************************************************************************************************************
      *                                               Getters and Setters
@@ -108,5 +121,9 @@ public class Transformer {
 
     public void setPowerSubstation(PowerSubstation powerSubstation) {
         this.powerSubstation = powerSubstation;
+    }
+
+    public List<Customer> getCustomers() {
+        return List.copyOf(customers);
     }
 }
