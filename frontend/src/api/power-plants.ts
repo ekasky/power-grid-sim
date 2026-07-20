@@ -12,6 +12,16 @@ export interface PowerPlant {
   };
 }
 
+export interface CreatePowerPlantRequest {
+  plantId: string;
+  initialBuildCost: number;
+  recurringGenerationCost: number;
+  location: {
+    x: number;
+    y: number;
+  };
+}
+
 export interface UpdatePowerPlantRequest {
   plantId: string;
   initialBuildCost: number;
@@ -88,6 +98,38 @@ export const updatePowerPlant = async (
 
     throw new Error(
       errorBody?.message || `Failed to update power plant: ${response.status}`,
+    );
+  }
+
+  const data = await response.json();
+
+  if (!data) {
+    throw new Error('Invalud power plant response.');
+  }
+
+  return data as PowerPlant;
+};
+
+export const createPowerPlant = async (
+  powerCompanyId: string,
+  request: CreatePowerPlantRequest,
+): Promise<PowerPlant> => {
+  const response = await fetch(`/api/companies/${powerCompanyId}/plants`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const errorBody = (await response
+      .json()
+      .catch(() => null)) as ApiErrorResponse | null;
+
+    throw new Error(
+      errorBody?.message || `Failed to create power plant: ${response.status}`,
     );
   }
 

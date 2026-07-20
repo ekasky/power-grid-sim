@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Controller, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { AlertCircle, Loader2 } from 'lucide-react';
-
+import { Loader2 } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -13,21 +12,18 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { FormError } from '@/components/form-error';
+import { usePowerCompanies } from '@/hooks/use-power-companies';
+import { SelectPowerCompany } from '@/components/select-power-company';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  createPowerPlant,
+  type CreatePowerPlantRequest,
+} from '@/api/power-plants';
 
 const createPowerPlantSchema = z.object({
-  companyId: z.string().min(1, 'Power company is required'),
-
   plantId: z
     .string()
     .trim()
@@ -47,44 +43,19 @@ const createPowerPlantSchema = z.object({
 
 type CreatePowerPlantForm = z.infer<typeof createPowerPlantSchema>;
 
-interface PowerCompany {
-  id: string;
-  longName: string;
-  shortName: string;
-}
-
-interface CreatePowerPlantRequest {
-  plantId: string;
-  initialBuildCost: number;
-  recurringGenerationCost: number;
-  location: {
-    x: number;
-    y: number;
-  };
-}
-
-interface ApiErrorResponse {
-  message?: string;
-  details?: string;
-}
-
 const CreatePowerPlant = () => {
   const navigate = useNavigate();
 
-  const [powerCompanies, setPowerCompanies] = useState<PowerCompany[]>([]);
-  const [companiesLoading, setCompaniesLoading] = useState(true);
-  const [companiesError, setCompaniesError] = useState<string | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
+  const powerCompaniesState = usePowerCompanies();
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
-    control,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<CreatePowerPlantForm>({
     resolver: zodResolver(createPowerPlantSchema),
     defaultValues: {
-      companyId: '',
       plantId: '',
       initialBuildCost: 0,
       recurringGenerationCost: 0,
@@ -93,55 +64,15 @@ const CreatePowerPlant = () => {
     },
   });
 
-  useEffect(() => {
-    const controller = new AbortController();
-
-    const getPowerCompanies = async () => {
-      try {
-        const response = await fetch('/api/companies', {
-          signal: controller.signal,
-        });
-
-        if (!response.ok) {
-          throw new Error(
-            `Failed to retrieve power companies: ${response.status}`,
-          );
-        }
-
-        const data: PowerCompany[] = await response.json();
-
-        if (!controller.signal.aborted) {
-          setPowerCompanies(data);
-          setCompaniesError(null);
-        }
-      } catch (error: unknown) {
-        if (error instanceof DOMException && error.name === 'AbortError') {
-          return;
-        }
-
-        console.error(error);
-
-        setCompaniesError(
-          error instanceof Error
-            ? error.message
-            : 'Unable to load power companies',
-        );
-      } finally {
-        if (!controller.signal.aborted) {
-          setCompaniesLoading(false);
-        }
-      }
-    };
-
-    void getPowerCompanies();
-
-    return () => {
-      controller.abort();
-    };
-  }, []);
-
   const onSubmit = async (values: CreatePowerPlantForm) => {
-    setFormError(null);
+    const powerCompanyId = powerCompaniesState.selectedPowerCompanyId;
+
+    if (!powerCompanyId) {
+      setSubmitError(
+        'Select a power company before creating a new power plant.',
+      );
+      return;
+    }
 
     const request: CreatePowerPlantRequest = {
       plantId: values.plantId,
@@ -154,43 +85,18 @@ const CreatePowerPlant = () => {
     };
 
     try {
-      const response = await fetch(
-        `/api/companies/${values.companyId}/plants`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(request),
-        },
-      );
-
-      if (!response.ok) {
-        const errorBody = (await response
-          .json()
-          .catch(() => null)) as ApiErrorResponse | null;
-
-        throw new Error(
-          errorBody?.message ??
-            errorBody?.details ??
-            `Failed to create power plant: ${response.status}`,
-        );
-      }
+      setSubmitError(null);
+      await createPowerPlant(powerCompanyId, request);
 
       navigate('/');
     } catch (error: unknown) {
       console.error(error);
 
-      setFormError(
-        error instanceof Error ? error.message : 'An unexpected error occurred',
+      setSubmitError(
+        error instanceof Error ? error.message : 'Unable to create power plant',
       );
     }
   };
-
-  const powerCompanyOptions = powerCompanies.map((company) => ({
-    value: company.id,
-    label: `${company.longName} (${company.shortName})`,
-  }));
 
   return (
     <div className='mx-auto w-full max-w-2xl py-4'>
@@ -215,83 +121,25 @@ const CreatePowerPlant = () => {
           </CardHeader>
 
           <CardContent className='space-y-7 px-8 pb-8'>
-            {formError && (
-              <Alert variant='destructive'>
-                <AlertCircle className='size-4' />
-
-                <AlertTitle>Unable to create power plant</AlertTitle>
-
-                <AlertDescription>{formError}</AlertDescription>
-              </Alert>
-            )}
-
-            {companiesError && (
-              <Alert variant='destructive'>
-                <AlertCircle className='size-4' />
-
-                <AlertTitle>Unable to load power companies</AlertTitle>
-
-                <AlertDescription>{companiesError}</AlertDescription>
-              </Alert>
-            )}
-
-            <div className='space-y-3'>
-              <Label htmlFor='companyId'>Power company</Label>
-
-              <Controller
-                name='companyId'
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    items={powerCompanyOptions}
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={
-                      companiesLoading ||
-                      Boolean(companiesError) ||
-                      powerCompanies.length === 0
-                    }
-                  >
-                    <SelectTrigger
-                      id='companyId'
-                      className='h-11 w-full'
-                      aria-invalid={Boolean(errors.companyId)}
-                    >
-                      <SelectValue
-                        placeholder={
-                          companiesLoading
-                            ? 'Loading power companies...'
-                            : powerCompanies.length === 0
-                              ? 'No power companies available'
-                              : 'Select a power company'
-                        }
-                      />
-                    </SelectTrigger>
-
-                    <SelectContent>
-                      {powerCompanies.map((company) => (
-                        <SelectItem key={company.id} value={company.id}>
-                          {company.longName} ({company.shortName})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
+            {submitError && (
+              <FormError
+                title='Unable to create power plant'
+                error={submitError}
               />
+            )}
 
-              {errors.companyId && (
-                <p className='text-sm text-destructive'>
-                  {errors.companyId.message}
-                </p>
-              )}
+            {powerCompaniesState.powerCompanyError && (
+              <FormError
+                title='Unable to load power companies'
+                error={powerCompaniesState.powerCompanyError}
+              />
+            )}
 
-              {!companiesLoading &&
-                !companiesError &&
-                powerCompanies.length === 0 && (
-                  <p className='text-sm text-muted-foreground'>
-                    Create a power company before creating a power plant.
-                  </p>
-                )}
+            <div className='space-y-4'>
+              <SelectPowerCompany
+                {...powerCompaniesState}
+                isSubmitting={isSubmitting}
+              />
             </div>
 
             <div className='space-y-3'>
@@ -447,9 +295,9 @@ const CreatePowerPlant = () => {
               type='submit'
               disabled={
                 isSubmitting ||
-                companiesLoading ||
-                Boolean(companiesError) ||
-                powerCompanies.length === 0
+                powerCompaniesState.isLoadingPowerCompanies ||
+                Boolean(powerCompaniesState.powerCompanyError) ||
+                powerCompaniesState.powerCompanies.length === 0
               }
             >
               {isSubmitting && <Loader2 className='size-4 animate-spin' />}
