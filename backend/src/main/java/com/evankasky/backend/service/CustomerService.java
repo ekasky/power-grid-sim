@@ -122,6 +122,18 @@ public class CustomerService {
 
     }
 
+    @Transactional
+    public void deleteCustomer(UUID customerId) {
+
+        Customer customer = customerRepo.findById(customerId)
+                        .orElseThrow(() -> new CustomerNotFoundException(
+                                "Customer '" + customerId + "' not found"
+                        )
+        );
+
+        customerRepo.delete(customer);
+    }
+
     /* *****************************************************************************************************************
      *                                              Helper Methods
      ***************************************************************************************************************** */

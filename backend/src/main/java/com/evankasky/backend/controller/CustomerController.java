@@ -8,6 +8,7 @@ import com.evankasky.backend.mapper.CustomerMapper;
 import com.evankasky.backend.model.Customer;
 import com.evankasky.backend.service.CustomerService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -58,6 +59,7 @@ public class CustomerController {
     }
 
     @PostMapping("/transformers/{transformerId}/customers")
+    @ResponseStatus(HttpStatus.CREATED)
     public CustomerResponse createCustomer(
             @PathVariable UUID transformerId,
             @Valid @RequestBody CreateCustomerRequest request
@@ -73,6 +75,14 @@ public class CustomerController {
     ) {
         Customer customer = customerService.updateCustomer(customerId, request);
         return customerMapper.toResponse(customer);
+    }
+
+    @DeleteMapping("/customers/{customerId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCustomer(
+            @PathVariable UUID customerId
+    ) {
+        customerService.deleteCustomer(customerId);
     }
 
 }
