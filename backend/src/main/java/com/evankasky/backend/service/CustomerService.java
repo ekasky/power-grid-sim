@@ -30,6 +30,12 @@ public class CustomerService {
         return customerRepo.findAll();
     }
 
+    @Transactional(readOnly = true)
+    public long getCustomerCount() {
+        return customerRepo.count();
+    }
+
+
     /* *****************************************************************************************************************
      *                                              Helper Methods
      ***************************************************************************************************************** */

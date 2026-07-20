@@ -1,5 +1,6 @@
 package com.evankasky.backend.controller;
 
+import com.evankasky.backend.dto.CountResponse;
 import com.evankasky.backend.dto.customer.CustomerResponse;
 import com.evankasky.backend.mapper.CustomerMapper;
 import com.evankasky.backend.service.CustomerService;
@@ -35,6 +36,12 @@ public class CustomerController {
                 .stream()
                 .map(customerMapper::toResponse)
                 .toList();
+    }
+
+    @GetMapping("/customers/count")
+    public CountResponse getCustomerCount() {
+        long count = customerService.getCustomerCount();
+        return new CountResponse(count);
     }
 
 }
