@@ -5,7 +5,7 @@ interface FormErrorProps {
   error: string | null;
 }
 
-export const FormError = ({ title, error }: FormErrorProps) => {
+export const AlertError = ({ title, error }: FormErrorProps) => {
   return (
     <Alert variant='destructive'>
       <AlertTitle>{title}</AlertTitle>

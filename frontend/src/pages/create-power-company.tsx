@@ -19,7 +19,7 @@ import {
   createPowerCompany,
   type CreatePowerCompanyRequest,
 } from '@/api/power-companies';
-import { FormError } from '@/components/form-error';
+import { AlertError } from '@/components/alert-error';
 
 const createPowerCompanySchema = z.object({
   longName: z
@@ -112,7 +112,10 @@ const CreatePowerCompany = () => {
 
           <CardContent className='space-y-7 px-8 pb-8'>
             {submitError && (
-              <FormError title='Unable to create company' error={submitError} />
+              <AlertError
+                title='Unable to create company'
+                error={submitError}
+              />
             )}
 
             <div className='space-y-3'>

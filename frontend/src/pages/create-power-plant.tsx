@@ -15,7 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FormError } from '@/components/form-error';
+import { AlertError } from '@/components/alert-error';
 import { usePowerCompanies } from '@/hooks/use-power-companies';
 import { SelectPowerCompany } from '@/components/select-power-company';
 import {
@@ -122,14 +122,14 @@ const CreatePowerPlant = () => {
 
           <CardContent className='space-y-7 px-8 pb-8'>
             {submitError && (
-              <FormError
+              <AlertError
                 title='Unable to create power plant'
                 error={submitError}
               />
             )}
 
             {powerCompaniesState.powerCompanyError && (
-              <FormError
+              <AlertError
                 title='Unable to load power companies'
                 error={powerCompaniesState.powerCompanyError}
               />

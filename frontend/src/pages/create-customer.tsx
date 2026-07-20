@@ -3,7 +3,7 @@ import {
   type CreateCustomerRequest,
   type CustomerType,
 } from '@/api/customer';
-import { FormError } from '@/components/form-error';
+import { AlertError } from '@/components/alert-error';
 import { SelectPowerCompany } from '@/components/select-power-company';
 import { SelectPowerPlants } from '@/components/select-power-plant';
 import { SelectSubstation } from '@/components/select-substation';
@@ -162,35 +162,35 @@ const CreateCustomer = () => {
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
             {powerCompaniesState.powerCompanyError && (
-              <FormError
+              <AlertError
                 title='Unable to load power companies'
                 error={powerCompaniesState.powerCompanyError}
               />
             )}
 
             {powerPlantsState.powerPlantError && (
-              <FormError
+              <AlertError
                 title='Unable to load power plants'
                 error={powerPlantsState.powerPlantError}
               />
             )}
 
             {substationState.substationError && (
-              <FormError
+              <AlertError
                 title='Unable to load substations'
                 error={substationState.substationError}
               />
             )}
 
             {transformersState.transformerError && (
-              <FormError
+              <AlertError
                 title='Unable to load transformers'
                 error={transformersState.transformerError}
               />
             )}
 
             {submitError && (
-              <FormError
+              <AlertError
                 title='Unable to create customer'
                 error={submitError}
               />

@@ -18,7 +18,7 @@ import { Label } from '@/components/ui/label';
 import { usePowerCompanies } from '@/hooks/use-power-companies';
 import { usePowerPlants } from '@/hooks/use-power-plants';
 import { useSubstation } from '@/hooks/use-substation';
-import { FormError } from '@/components/form-error';
+import { AlertError } from '@/components/alert-error';
 import { SelectPowerCompany } from '@/components/select-power-company';
 import { SelectPowerPlants } from '@/components/select-power-plant';
 import { SelectSubstation } from '@/components/select-substation';
@@ -137,28 +137,28 @@ const CreateTransformer = () => {
 
           <CardContent className='space-y-7 px-8 pb-8'>
             {submitError && (
-              <FormError
+              <AlertError
                 title='Unable to create transformer'
                 error={submitError}
               />
             )}
 
             {powerCompaniesState.powerCompanyError && (
-              <FormError
+              <AlertError
                 title='Unable to load power companies'
                 error={powerCompaniesState.powerCompanyError}
               />
             )}
 
             {powerPlantsState.powerPlantError && (
-              <FormError
+              <AlertError
                 title='Unable to load power plants'
                 error={powerPlantsState.powerPlantError}
               />
             )}
 
             {substationsState.substationError && (
-              <FormError
+              <AlertError
                 title='Unable to load substations'
                 error={substationsState.substationError}
               />
