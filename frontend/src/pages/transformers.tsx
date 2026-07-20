@@ -10,6 +10,7 @@ import {
   type Transformer,
 } from '@/api/transformers';
 import { DeleteActionDialog } from '@/components/delete-action-dialog';
+import { EditTransformerDialog } from '@/components/edit-transformer-dialog';
 import { EmptyMessage } from '@/components/empty-message';
 import { LoadingMessage } from '@/components/loading-message';
 import { SortableHeader } from '@/components/sortable-header';
@@ -117,6 +118,16 @@ const Transformers = () => {
     }
   };
 
+  const handleTransformerUpdated = (updatedTransformer: Transformer) => {
+    setTransformers((currentTransformers) =>
+      currentTransformers.map((transformer) =>
+        transformer.id === updatedTransformer.id
+          ? updatedTransformer
+          : transformer,
+      ),
+    );
+  };
+
   const columns: ColumnDef<Transformer>[] = [
     {
       accessorKey: 'transformerId',
@@ -169,6 +180,12 @@ const Transformers = () => {
 
         return (
           <div className='flex justify-end gap-2'>
+            <EditTransformerDialog
+              transformer={transformer}
+              disabled={isDeleting}
+              onUpdated={handleTransformerUpdated}
+            />
+
             <DeleteActionDialog
               title={`Delete ${transformer.transformerId}?`}
               description={
