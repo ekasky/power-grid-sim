@@ -136,7 +136,7 @@ const CreateCustomer = () => {
                 <h2 className='font-medium'>Power connection</h2>
 
                 <p className='text-sm text-muted-foreground'>
-                  Choose the power company, plant, substatio, and transformer
+                  Choose the power company, plant, substation, and transformer
                 </p>
               </div>
 
