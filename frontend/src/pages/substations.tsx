@@ -1,5 +1,3 @@
-import { getPowerCompanies, type PowerCompany } from '@/api/power-companies';
-import { getPowerPlants, type PowerPlant } from '@/api/power-plants';
 import {
   deletePowerSubstation,
   getPowerSubstations,
@@ -7,18 +5,8 @@ import {
 } from '@/api/power-substations';
 import { DeleteActionDialog } from '@/components/delete-action-dialog';
 import { EditPowerSubstationDialog } from '@/components/edit-power-substation-dialog';
-import { EmptyMessage } from '@/components/empty-message';
-import { LoadingMessage } from '@/components/loading-message';
+import { EntityTableCard } from '@/components/entity-table-card';
 import { SortableHeader } from '@/components/sortable-header';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import {
   Select,
   SelectContent,
@@ -26,346 +14,181 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { useEntityList } from '@/hooks/use-entity-list';
+import { usePowerCompanies } from '@/hooks/use-power-companies';
+import { usePowerPlants } from '@/hooks/use-power-plants';
 import { currencyFormatter } from '@/lib/formatters';
-import {
-  flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  useReactTable,
-  type ColumnDef,
-  type SortingState,
-} from '@tanstack/react-table';
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import type { ColumnDef } from '@tanstack/react-table';
+import { useCallback, useMemo } from 'react';
 
 const Substations = () => {
-  const [powerCompanies, setPowerCompanies] = useState<PowerCompany[]>([]);
-  const [powerPlants, setPowerPlants] = useState<PowerPlant[]>([]);
-  const [substations, setSubstations] = useState<PowerSubstation[]>([]);
+  const powerCompaniesState = usePowerCompanies();
 
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(
-    null,
-  );
-  const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
-
-  const [sorting, setSorting] = useState<SortingState>([]);
-
-  const [isLoadingCompanies, setIsLoadingCompanies] = useState(true);
-  const [isLoadingPlants, setIsLoadingPlants] = useState(false);
-  const [isLoadingSubstations, setIsLoadingSubstations] = useState(false);
-
-  const [companyError, setCompanyError] = useState<string | null>(null);
-  const [plantError, setPlantError] = useState<string | null>(null);
-  const [substationError, setSubstationError] = useState<string | null>(null);
-
-  const [deletingSubstationId, setDeletingSubstationId] = useState<
-    string | null
-  >(null);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
-
-  const selectedCompany = powerCompanies.find(
-    (company) => company.id === selectedCompanyId,
+  const powerPlantsState = usePowerPlants(
+    powerCompaniesState.selectedPowerCompanyId,
   );
 
-  const selectedPlant = powerPlants.find(
-    (plant) => plant.id === selectedPlantId,
+  const {
+    powerCompanies,
+    selectedPowerCompanyId,
+    isLoadingPowerCompanies,
+    powerCompanyError,
+    selectPowerCompany,
+    companyOptions,
+  } = powerCompaniesState;
+
+  const {
+    powerPlants,
+    selectedPowerPlantId,
+    isLoadingPowerPlants,
+    powerPlantError,
+    selectPowerPlant,
+    plantOptions,
+  } = powerPlantsState;
+
+  const loadSubstations = useCallback(
+    (signal: AbortSignal): Promise<PowerSubstation[]> => {
+      if (!selectedPowerPlantId) {
+        return Promise.resolve([]);
+      }
+
+      return getPowerSubstations(selectedPowerPlantId, signal);
+    },
+    [selectedPowerPlantId],
   );
 
-  const handleDeleteSubstation = async (substation: PowerSubstation) => {
-    try {
-      setDeletingSubstationId(substation.id);
-      setDeleteError(null);
-
-      await deletePowerSubstation(substation.id);
-
-      setSubstations((currentSubstations) =>
-        currentSubstations.filter(
-          (currentSubstation) => currentSubstation.id !== substation.id,
-        ),
-      );
-    } catch (error: unknown) {
-      console.error(error);
-
-      setDeleteError(
-        error instanceof Error
-          ? error.message
-          : 'Unable to delete the power substation.',
-      );
-    } finally {
-      setDeletingSubstationId(null);
-    }
-  };
-
-  const handlePowerSubstationUpdated = (updatedSubstation: PowerSubstation) => {
-    setSubstations((currentSubstations) =>
-      currentSubstations.map((substation) =>
-        substation.id === updatedSubstation.id ? updatedSubstation : substation,
-      ),
-    );
-  };
-
-  const columns: ColumnDef<PowerSubstation>[] = [
-    {
-      accessorKey: 'substationId',
-      header: ({ column }) => (
-        <SortableHeader column={column} title='Substation ID' />
-      ),
-      cell: ({ row }) => (
-        <span className='font-medium'>{row.original.substationId}</span>
-      ),
-    },
-    {
-      id: 'initialInstallationCost',
-      accessorFn: (substation) => Number(substation.initialBuildCost),
-      header: ({ column }) => (
-        <SortableHeader column={column} title='Installation Cost' />
-      ),
-      cell: ({ row }) =>
-        currencyFormatter.format(Number(row.original.initialBuildCost)),
-    },
-    {
-      id: 'recurringMaintenanceCost',
-      accessorFn: (substation) => Number(substation.recurringMaintenanceCost),
-      header: ({ column }) => (
-        <SortableHeader column={column} title='Maintenance Cost' />
-      ),
-      cell: ({ row }) =>
-        currencyFormatter.format(Number(row.original.recurringMaintenanceCost)),
-    },
-    {
-      id: 'location',
-      accessorFn: (substation) =>
-        `${substation.location.x},${substation.location.y}`,
-      header: ({ column }) => (
-        <SortableHeader column={column} title='Location' />
-      ),
-      cell: ({ row }) =>
-        `(${row.original.location.x}, ${row.original.location.y})`,
-    },
-    {
-      id: 'actions',
-      enableSorting: false,
-      header: () => <div className='text-right'>Actions</div>,
-      cell: ({ row }) => {
-        const substation = row.original;
-        const isDeleting = deletingSubstationId === substation.id;
-
-        return (
-          <div className='flex justify-end gap-2'>
-            <EditPowerSubstationDialog
-              substation={substation}
-              disabled={isDeleting}
-              onUpdated={handlePowerSubstationUpdated}
-            />
-
-            <DeleteActionDialog
-              title={`Delete ${substation.substationId}?`}
-              description={
-                <>
-                  This action cannot be undone. The substation will be
-                  permanently removed from{' '}
-                  {selectedPlant?.plantId ?? 'the power plant'}.
-                </>
-              }
-              confirmLabel='Delete Substation'
-              isDeleting={isDeleting}
-              onConfirm={() => handleDeleteSubstation(substation)}
-            />
-          </div>
-        );
-      },
-    },
-  ];
-
-  /*
-   * Load companies when the page opens.
-   */
-  useEffect(() => {
-    const controller = new AbortController();
-
-    const loadPowerCompanies = async () => {
-      try {
-        setIsLoadingCompanies(true);
-        setCompanyError(null);
-
-        const companies = await getPowerCompanies(controller.signal);
-
-        if (controller.signal.aborted) {
-          return;
-        }
-
-        setPowerCompanies(companies);
-        setSelectedCompanyId(companies[0]?.id ?? null);
-      } catch (error: unknown) {
-        if (error instanceof DOMException && error.name === 'AbortError') {
-          return;
-        }
-
-        console.error(error);
-
-        if (!controller.signal.aborted) {
-          setCompanyError(
-            error instanceof Error
-              ? error.message
-              : 'Unable to load power companies.',
-          );
-        }
-      } finally {
-        if (!controller.signal.aborted) {
-          setIsLoadingCompanies(false);
-        }
-      }
-    };
-
-    void loadPowerCompanies();
-
-    return () => {
-      controller.abort();
-    };
-  }, []);
-
-  /*
-   * Load the selected company's plants.
-   */
-  useEffect(() => {
-    setSelectedPlantId(null);
-    setPowerPlants([]);
-    setSubstations([]);
-    setPlantError(null);
-    setSubstationError(null);
-    setDeleteError(null);
-
-    if (!selectedCompanyId) {
-      return;
-    }
-
-    const controller = new AbortController();
-
-    const loadPowerPlants = async () => {
-      try {
-        setIsLoadingPlants(true);
-
-        const plants = await getPowerPlants(
-          selectedCompanyId,
-          controller.signal,
-        );
-
-        if (controller.signal.aborted) {
-          return;
-        }
-
-        setPowerPlants(plants);
-        setSelectedPlantId(plants[0]?.id ?? null);
-      } catch (error: unknown) {
-        if (error instanceof DOMException && error.name === 'AbortError') {
-          return;
-        }
-
-        console.error(error);
-
-        if (!controller.signal.aborted) {
-          setPlantError(
-            error instanceof Error
-              ? error.message
-              : 'Unable to load power plants.',
-          );
-        }
-      } finally {
-        if (!controller.signal.aborted) {
-          setIsLoadingPlants(false);
-        }
-      }
-    };
-
-    void loadPowerPlants();
-
-    return () => {
-      controller.abort();
-    };
-  }, [selectedCompanyId]);
-
-  /*
-   * Load the selected plant's substations.
-   */
-  useEffect(() => {
-    setSubstations([]);
-    setSubstationError(null);
-    setDeleteError(null);
-
-    if (!selectedPlantId) {
-      return;
-    }
-
-    const controller = new AbortController();
-
-    const loadSubstations = async () => {
-      try {
-        setIsLoadingSubstations(true);
-
-        const loadedSubstations = await getPowerSubstations(
-          selectedPlantId,
-          controller.signal,
-        );
-
-        if (!controller.signal.aborted) {
-          setSubstations(loadedSubstations);
-        }
-      } catch (error: unknown) {
-        if (error instanceof DOMException && error.name === 'AbortError') {
-          return;
-        }
-
-        console.error(error);
-
-        if (!controller.signal.aborted) {
-          setSubstationError(
-            error instanceof Error
-              ? error.message
-              : 'Unable to load power substations.',
-          );
-        }
-      } finally {
-        if (!controller.signal.aborted) {
-          setIsLoadingSubstations(false);
-        }
-      }
-    };
-
-    void loadSubstations();
-
-    return () => {
-      controller.abort();
-    };
-  }, [selectedPlantId]);
-
-  const table = useReactTable({
-    data: substations,
-    columns,
-    state: {
-      sorting,
-    },
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
+  const substations = useEntityList<PowerSubstation>({
+    queryKey: selectedPowerPlantId,
+    loadItems: loadSubstations,
+    deleteItem: deletePowerSubstation,
+    loadErrorFallback: 'Unable to load substations',
+    deleteErrorFallback: 'Unable to delete substation',
   });
 
-  const companyOptions = powerCompanies.map((company) => ({
-    value: company.id,
-    label: `${company.longName} (${company.shortName})`,
-  }));
+  const selectedCompany =
+    powerCompanies.find((company) => company.id === selectedPowerCompanyId) ??
+    null;
 
-  const plantOptions = powerPlants.map((plant) => ({
-    value: plant.id,
-    label: plant.plantId,
-  }));
+  const selectedPlant =
+    powerPlants.find((plant) => plant.id === selectedPowerPlantId) ?? null;
+
+  const columns = useMemo<ColumnDef<PowerSubstation>[]>(
+    () => [
+      {
+        accessorKey: 'substationId',
+        header: ({ column }) => (
+          <SortableHeader column={column} title='Substation ID' />
+        ),
+        cell: ({ row }) => (
+          <span className='font-medium'>{row.original.substationId}</span>
+        ),
+      },
+      {
+        id: 'initialInstallationCost',
+        accessorFn: (substation) => Number(substation.initialBuildCost),
+        header: ({ column }) => (
+          <SortableHeader column={column} title='Installation Cost' />
+        ),
+        cell: ({ row }) =>
+          currencyFormatter.format(Number(row.original.initialBuildCost)),
+      },
+      {
+        id: 'recurringMaintenanceCost',
+        accessorFn: (substation) => Number(substation.recurringMaintenanceCost),
+        header: ({ column }) => (
+          <SortableHeader column={column} title='Maintenance Cost' />
+        ),
+        cell: ({ row }) =>
+          currencyFormatter.format(
+            Number(row.original.recurringMaintenanceCost),
+          ),
+      },
+      {
+        id: 'location',
+        accessorFn: (substation) =>
+          `${substation.location.x},${substation.location.y}`,
+        header: ({ column }) => (
+          <SortableHeader column={column} title='Location' />
+        ),
+        cell: ({ row }) =>
+          `(${row.original.location.x}, ${row.original.location.y})`,
+      },
+      {
+        id: 'actions',
+        enableSorting: false,
+        header: () => <div className='text-right'>Actions</div>,
+        cell: ({ row }) => {
+          const substation = row.original;
+          const isDeleting = substations.deletingId === substation.id;
+
+          return (
+            <div className='flex justify-end gap-2'>
+              <EditPowerSubstationDialog
+                substation={substation}
+                disabled={isDeleting}
+                onUpdated={substations.updateItem}
+              />
+
+              <DeleteActionDialog
+                title={`Delete ${substation.substationId}?`}
+                description={
+                  <>
+                    This action cannot be undone. The substation will be
+                    permanently removed from{' '}
+                    {selectedPlant?.plantId ?? 'the power plant'}.
+                  </>
+                }
+                confirmLabel='Delete Substation'
+                isDeleting={isDeleting}
+                onConfirm={() => substations.removeItem(substation)}
+              />
+            </div>
+          );
+        },
+      },
+    ],
+    [
+      selectedPlant?.plantId,
+      substations.deletingId,
+      substations.removeItem,
+      substations.updateItem,
+    ],
+  );
+
+  const isLoading =
+    isLoadingPowerCompanies || isLoadingPowerPlants || substations.isLoading;
+
+  const loadingMessage = isLoadingPowerCompanies
+    ? 'Loading power companies...'
+    : isLoadingPowerPlants
+      ? 'Loading power plants...'
+      : 'Loading power substations...';
+
+  const loadError =
+    powerCompanyError ?? powerPlantError ?? substations.loadError;
+
+  const loadErrorTitle = powerCompanyError
+    ? 'Unable to load power companies'
+    : powerPlantError
+      ? 'Unable to load power plants'
+      : 'Unable to load power substations';
+
+  const description = selectedPlant
+    ? `${substations.items.length} ${
+        substations.items.length === 1 ? 'substation' : 'substations'
+      } assigned to ${selectedPlant.plantId}.`
+    : 'Select a power plant to view its substations.';
+
+  const emptyMessage =
+    powerCompanies.length === 0
+      ? 'Create a power company before adding substations.'
+      : powerPlants.length === 0
+        ? `${
+            selectedCompany?.longName ?? 'This company'
+          } does not have any power plants.`
+        : selectedPlant
+          ? `${selectedPlant.plantId} does not have any substations.`
+          : 'Select a power plant.';
 
   return (
     <div className='space-y-6'>
@@ -373,44 +196,40 @@ const Substations = () => {
         <h1 className='text-3xl font-bold tracking-tight'>Power Substations</h1>
 
         <p className='mt-1 text-muted-foreground'>
-          View substations belonging to each power plant
+          View substations belonging to each power plant.
         </p>
       </div>
 
-      <Card>
-        <CardHeader className='gap-4'>
-          <div className='flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
-            <div>
-              <CardTitle>Power Substations</CardTitle>
-
-              <CardDescription>
-                {selectedPlant
-                  ? `${substations.length} ${
-                      substations.length === 1 ? 'substation' : 'substations'
-                    } assigned to ${selectedPlant.plantId}.`
-                  : 'Select a power plant to view its substations.'}
-              </CardDescription>
-            </div>
-
-            <Button
-              disabled={!selectedPlantId}
-              render={
-                <Link to='/create-substation'>Create Power Substation</Link>
-              }
-            />
-          </div>
-
+      <EntityTableCard<PowerSubstation>
+        title='Power Substations'
+        description={description}
+        createLabel='Create Power Substation'
+        createTo='/create-substation'
+        data={substations.items}
+        columns={columns}
+        isLoading={isLoading}
+        loadingMessage={loadingMessage}
+        loadError={loadError}
+        loadErrorTitle={loadErrorTitle}
+        deleteError={substations.deleteError}
+        deleteErrorTitle='Unable to delete power substation'
+        emptyMessage={emptyMessage}
+        toolbar={
           <div className='flex flex-col gap-3 sm:flex-row'>
             <Select
               items={companyOptions}
-              value={selectedCompanyId}
-              onValueChange={(value) => {
-                setSelectedCompanyId(value);
-              }}
-              disabled={isLoadingCompanies || powerCompanies.length === 0}
+              value={selectedPowerCompanyId}
+              onValueChange={selectPowerCompany}
+              disabled={isLoadingPowerCompanies || powerCompanies.length === 0}
             >
               <SelectTrigger className='w-full sm:w-80'>
-                <SelectValue placeholder='Select a power company' />
+                <SelectValue
+                  placeholder={
+                    isLoadingPowerCompanies
+                      ? 'Loading power companies...'
+                      : 'Select a power company'
+                  }
+                />
               </SelectTrigger>
 
               <SelectContent>
@@ -424,18 +243,22 @@ const Substations = () => {
 
             <Select
               items={plantOptions}
-              value={selectedPlantId}
-              onValueChange={(value) => {
-                setSelectedPlantId(value);
-              }}
+              value={selectedPowerPlantId}
+              onValueChange={selectPowerPlant}
               disabled={
-                isLoadingPlants ||
-                !selectedCompanyId ||
+                isLoadingPowerPlants ||
+                !selectedPowerCompanyId ||
                 powerPlants.length === 0
               }
             >
               <SelectTrigger className='w-full sm:w-72'>
-                <SelectValue placeholder='Select a power plant' />
+                <SelectValue
+                  placeholder={
+                    isLoadingPowerPlants
+                      ? 'Loading power plants...'
+                      : 'Select a power plant'
+                  }
+                />
               </SelectTrigger>
 
               <SelectContent>
@@ -447,107 +270,8 @@ const Substations = () => {
               </SelectContent>
             </Select>
           </div>
-        </CardHeader>
-
-        <CardContent>
-          {deleteError && (
-            <Alert variant='destructive' className='mb-4'>
-              <AlertTitle>Unable to delete power substation</AlertTitle>
-              <AlertDescription>{deleteError}</AlertDescription>
-            </Alert>
-          )}
-
-          {companyError && (
-            <Alert variant='destructive' className='mb-4'>
-              <AlertTitle>Unable to load power companies</AlertTitle>
-              <AlertDescription>{companyError}</AlertDescription>
-            </Alert>
-          )}
-
-          {plantError && (
-            <Alert variant='destructive' className='mb-4'>
-              <AlertTitle>Unable to load power plants</AlertTitle>
-              <AlertDescription>{plantError}</AlertDescription>
-            </Alert>
-          )}
-
-          {substationError && (
-            <Alert variant='destructive' className='mb-4'>
-              <AlertTitle>Unable to load power substations</AlertTitle>
-              <AlertDescription>{substationError}</AlertDescription>
-            </Alert>
-          )}
-
-          {isLoadingCompanies ? (
-            <LoadingMessage message='Loading power companies...' />
-          ) : powerCompanies.length === 0 ? (
-            <EmptyMessage message='Create a power company before adding substations.' />
-          ) : isLoadingPlants ? (
-            <LoadingMessage message='Loading power plants...' />
-          ) : powerPlants.length === 0 ? (
-            <EmptyMessage
-              message={`${selectedCompany?.longName ?? 'This company'} does not have any power plants.`}
-            />
-          ) : isLoadingSubstations ? (
-            <LoadingMessage message='Loading power substations...' />
-          ) : (
-            <div className='overflow-hidden rounded-md border'>
-              <Table>
-                <TableHeader>
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <TableRow key={headerGroup.id}>
-                      {headerGroup.headers.map((header) => (
-                        <TableHead
-                          key={header.id}
-                          className='whitespace-nowrap'
-                        >
-                          {header.isPlaceholder
-                            ? null
-                            : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext(),
-                              )}
-                        </TableHead>
-                      ))}
-                    </TableRow>
-                  ))}
-                </TableHeader>
-
-                <TableBody>
-                  {table.getRowModel().rows.length > 0 ? (
-                    table.getRowModel().rows.map((row) => (
-                      <TableRow key={row.id}>
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell
-                            key={cell.id}
-                            className='whitespace-nowrap'
-                          >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell
-                        colSpan={columns.length}
-                        className='h-32 text-center text-muted-foreground'
-                      >
-                        {selectedPlant
-                          ? `${selectedPlant.plantId} does not have any substations.`
-                          : 'Select a power plant.'}
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        }
+      />
     </div>
   );
 };

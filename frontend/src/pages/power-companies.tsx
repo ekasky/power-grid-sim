@@ -129,7 +129,7 @@ const PowerCompanies = () => {
         </p>
       </div>
 
-      <EntityTableCard
+      <EntityTableCard<PowerCompany>
         title='All Power Companies'
         description={`${companies.items.length}} ${companies.items.length === 1 ? 'company' : 'companies'} in the simulation.`}
         createLabel='Create Power Company'
@@ -139,7 +139,7 @@ const PowerCompanies = () => {
         isLoading={companies.isLoading}
         loadingMessage='Loading power companies...'
         loadError={companies.loadError}
-        loadingErrorTitle='Unable to load power companies'
+        loadErrorTitle='Unable to load power companies'
         deleteError={companies.deleteError}
         deleteErrorTitle='Unable to delete power company'
         emptyMessage='No power companies have been created.'

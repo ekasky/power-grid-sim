@@ -43,7 +43,7 @@ interface EntityTableCardProps<T extends Entity> {
   loadingMessage: string;
 
   loadError: string | null;
-  loadingErrorTitle: string;
+  loadErrorTitle: string;
 
   deleteError: string | null;
   deleteErrorTitle: string;
@@ -53,7 +53,7 @@ interface EntityTableCardProps<T extends Entity> {
   toolbar?: ReactNode;
 }
 
-export const EntityTableCard = <T extends Entity>({
+export function EntityTableCard<T extends Entity>({
   title,
   description,
   createLabel,
@@ -63,15 +63,15 @@ export const EntityTableCard = <T extends Entity>({
   isLoading,
   loadingMessage,
   loadError,
-  loadingErrorTitle,
+  loadErrorTitle: loadingErrorTitle,
   deleteError,
   deleteErrorTitle,
   emptyMessage,
   toolbar,
-}: EntityTableCardProps<T>) => {
+}: EntityTableCardProps<T>) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
-  const table = useReactTable({
+  const table = useReactTable<T>({
     data,
     columns,
     state: { sorting },
@@ -149,4 +149,4 @@ export const EntityTableCard = <T extends Entity>({
       </CardContent>
     </Card>
   );
-};
+}

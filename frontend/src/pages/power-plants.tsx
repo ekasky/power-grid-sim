@@ -151,7 +151,7 @@ const PowerPlants = () => {
         </p>
       </div>
 
-      <EntityTableCard
+      <EntityTableCard<PowerPlant>
         title='Power Plants'
         description={
           selectedCompany
@@ -171,7 +171,7 @@ const PowerPlants = () => {
             : 'Loading power plants...'
         }
         loadError={powerCompanyError ?? plants.loadError}
-        loadingErrorTitle={
+        loadErrorTitle={
           powerCompanyError
             ? 'Unable to load power companies'
             : 'Unable to load power plants'
