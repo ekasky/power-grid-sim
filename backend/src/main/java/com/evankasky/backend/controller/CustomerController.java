@@ -3,6 +3,7 @@ package com.evankasky.backend.controller;
 import com.evankasky.backend.dto.CountResponse;
 import com.evankasky.backend.dto.customer.CreateCustomerRequest;
 import com.evankasky.backend.dto.customer.CustomerResponse;
+import com.evankasky.backend.dto.customer.UpdateCustomerRequest;
 import com.evankasky.backend.mapper.CustomerMapper;
 import com.evankasky.backend.model.Customer;
 import com.evankasky.backend.service.CustomerService;
@@ -62,6 +63,15 @@ public class CustomerController {
             @Valid @RequestBody CreateCustomerRequest request
     ) {
         Customer customer = customerService.createCustomer(transformerId, request);
+        return customerMapper.toResponse(customer);
+    }
+
+    @PatchMapping("/customers/{customerId}")
+    public CustomerResponse updateCustomer(
+            @PathVariable UUID customerId,
+            @Valid @RequestBody UpdateCustomerRequest request
+    ) {
+        Customer customer = customerService.updateCustomer(customerId, request);
         return customerMapper.toResponse(customer);
     }
 

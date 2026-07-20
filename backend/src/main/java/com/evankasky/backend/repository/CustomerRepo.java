@@ -10,6 +10,7 @@ import java.util.UUID;
 public interface CustomerRepo extends JpaRepository<Customer, UUID> {
 
     boolean existsByAccountNumber(String accountNumber);
+    boolean existsByAccountNumberAndIdNot(String accountNumber, UUID customerId);
     Optional<Customer> findByAccountNumber(String accountNumber);
     List<Customer> findAllByTransformerId(UUID transformerId);
     long countByTransformerId(UUID transformerId);

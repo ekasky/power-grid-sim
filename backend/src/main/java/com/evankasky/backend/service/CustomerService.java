@@ -2,7 +2,9 @@ package com.evankasky.backend.service;
 
 import com.evankasky.backend.dto.customer.CreateCustomerRequest;
 import com.evankasky.backend.dto.customer.CustomerResponse;
+import com.evankasky.backend.dto.customer.UpdateCustomerRequest;
 import com.evankasky.backend.exception.customer.CustomerExistsException;
+import com.evankasky.backend.exception.customer.CustomerNotFoundException;
 import com.evankasky.backend.exception.transformer.TransformerNotFoundException;
 import com.evankasky.backend.model.*;
 import com.evankasky.backend.repository.CustomerRepo;
@@ -78,6 +80,45 @@ public class CustomerService {
 
         customer.setTransformer(transformer);
         return customerRepo.save(customer);
+
+    }
+
+    @Transactional
+    public Customer updateCustomer(
+            UUID customerId,
+            UpdateCustomerRequest request
+    ) {
+
+        Customer customer = customerRepo.findById(customerId)
+                .orElseThrow(() -> new CustomerNotFoundException(
+                        "Customer '" + customerId + "' not found"
+                )
+        );
+
+        if(request.accountNumber() != null) {
+
+            String accountNumber = request.accountNumber().trim();
+
+            if(customerRepo.existsByAccountNumberAndIdNot(accountNumber, customerId)) {
+                throw new CustomerExistsException(
+                        "Customer with account number '" + accountNumber + "' already exists"
+                );
+            }
+
+            customer.setAccountNumber(accountNumber);
+
+        }
+
+        if(request.name() != null) {
+            customer.setName(request.name().trim());
+        }
+
+        if(request.location() != null) {
+            Location location = new Location(request.location().x(), request.location().y());
+            customer.setLocation(location);
+        }
+
+        return customer;
 
     }
 
