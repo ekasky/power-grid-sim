@@ -12,7 +12,7 @@ public record UpdateCustomerRequest(
         String accountNumber,
 
         @Pattern(regexp = ".*\\S.*", message = "Name cannot be empty")
-        @Size(max = 120, message = "Name exceed 120 characters")
+        @Size(max = 120, message = "Name cannot exceed 120 characters")
         String name,
 
         @Valid
