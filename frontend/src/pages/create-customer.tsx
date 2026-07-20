@@ -276,6 +276,56 @@ const CreateCustomer = () => {
                 </div>
               </div>
             </div>
+
+            <div className='space-y-4'>
+              <div>
+                <h2 className='font-medium'>Location</h2>
+
+                <p className='text-sm text-muted-foreground'>
+                  Enter the customer position on the simulation grid.
+                </p>
+              </div>
+
+              <div className='grid gap-4 sm:grid-cols-2'>
+                <div className='space-y-2'>
+                  <Label htmlFor='x'>X coordinate</Label>
+
+                  <Input
+                    id='x'
+                    type='number'
+                    step='1'
+                    disabled={isSubmitting}
+                    aria-invalid={Boolean(errors.x)}
+                    {...register('x', { valueAsNumber: true })}
+                  />
+
+                  {errors.x && (
+                    <p className='text-sm text-destructive'>
+                      {errors.x.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className='space-y-2'>
+                  <Label htmlFor='y'>Y coordinate</Label>
+
+                  <Input
+                    id='y'
+                    type='number'
+                    step='1'
+                    disabled={isSubmitting}
+                    aria-invalid={Boolean(errors.y)}
+                    {...register('y', { valueAsNumber: true })}
+                  />
+
+                  {errors.y && (
+                    <p className='text-sm text-destructive'>
+                      {errors.y.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
           </form>
         </CardContent>
       </Card>
