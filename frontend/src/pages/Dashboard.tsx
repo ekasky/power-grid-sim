@@ -1,3 +1,4 @@
+import { getCustomerCount } from '@/api/customer';
 import { SummaryCard } from '@/components/summary-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -36,6 +37,9 @@ const Dashboard = () => {
 
   const [transformerCount, setTransformerCount] = useState<number | null>(null);
   const [transformerError, setTransformerError] = useState<boolean>(false);
+
+  const [customerCount, setCustomerCount] = useState<number | null>(null);
+  const [customerError, setCustomerError] = useState<boolean>(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -133,6 +137,28 @@ const Dashboard = () => {
       }
     };
 
+    const loadCustomerCount = async () => {
+      try {
+        setCustomerError(false);
+
+        const customerCount = await getCustomerCount(controller.signal);
+
+        if (!controller.signal.aborted) {
+          setCustomerCount(customerCount);
+        }
+      } catch (error: unknown) {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          return;
+        }
+
+        console.error(error);
+
+        if (!controller.signal.aborted) {
+          setCustomerError(true);
+        }
+      }
+    };
+
     const loadSummaryCounts = async () => {
       setIsRefreshing(true);
 
@@ -141,6 +167,7 @@ const Dashboard = () => {
         getPowerPlantCount(),
         getPowerSubstationCount(),
         getTransformerCount(),
+        loadCustomerCount(),
       ]);
 
       if (!controller.signal.aborted) {
@@ -195,6 +222,16 @@ const Dashboard = () => {
           : transformerCount.toString(),
       description: 'Customer transformers',
       to: '/transformers',
+    },
+    {
+      label: 'Customers',
+      value: customerError
+        ? 'Error'
+        : customerCount === null
+          ? '--'
+          : customerCount.toString(),
+      description: 'Customers in simulation',
+      to: '/customers',
     },
   ];
 
