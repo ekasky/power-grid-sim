@@ -71,7 +71,7 @@ const CreateCustomer = () => {
   };
 
   return (
-    <div className='mx-auto max-w-3cl space-y-6'>
+    <div className='mx-auto max-w-3xl space-y-6'>
       <div>
         <h1 className='mt-1 text-muted-foreground'>Create Customer</h1>
 
