@@ -5,6 +5,7 @@ import {
   getPowerSubstations,
   type PowerSubstation,
 } from '@/api/power-substations';
+import { EditPowerSubstationDialog } from '@/components/edit-power-substation-dialog';
 import { SortableHeader } from '@/components/sortable-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
@@ -112,6 +113,14 @@ const Substations = () => {
     }
   };
 
+  const handlePowerSubstationUpdated = (updatedSubstation: PowerSubstation) => {
+    setSubstations((currentSubstations) =>
+      currentSubstations.map((substation) =>
+        substation.id === updatedSubstation.id ? updatedSubstation : substation,
+      ),
+    );
+  };
+
   const columns: ColumnDef<PowerSubstation>[] = [
     {
       accessorKey: 'substationId',
@@ -160,6 +169,12 @@ const Substations = () => {
 
         return (
           <div className='flex justify-end gap-2'>
+            <EditPowerSubstationDialog
+              substation={substation}
+              disabled={isDeleting}
+              onUpdated={handlePowerSubstationUpdated}
+            />
+
             <AlertDialog>
               <AlertDialogTrigger
                 render={

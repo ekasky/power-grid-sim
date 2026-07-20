@@ -11,6 +11,16 @@ export interface PowerSubstation {
   };
 }
 
+export interface UpdatePowerSubstationRequest {
+  substationId: string;
+  initialInstallationCost: number;
+  recurringMaintenanceCost: number;
+  location: {
+    x: number;
+    y: number;
+  };
+}
+
 export const getPowerSubstations = async (
   powerPlantId: string,
   signal?: AbortSignal,
@@ -64,4 +74,37 @@ export const deletePowerSubstation = async (
         `Failed to delete power substation: ${response.status}`,
     );
   }
+};
+
+export const updatePowerSubstation = async (
+  powerSubstationId: string,
+  request: UpdatePowerSubstationRequest,
+): Promise<PowerSubstation> => {
+  const response = await fetch(`/api/substations/${powerSubstationId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const errorBody = (await response
+      .json()
+      .catch(() => null)) as ApiErrorResponse | null;
+
+    throw new Error(
+      errorBody?.message ||
+        `Failed to update power substation: ${response.status}`,
+    );
+  }
+
+  const data = await response.json();
+
+  if (!data) {
+    throw new Error('Invalid power substation response');
+  }
+
+  return data as PowerSubstation;
 };
