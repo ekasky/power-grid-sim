@@ -4,6 +4,7 @@ import { SelectPowerCompany } from '@/components/select-power-company';
 import { SelectPowerPlants } from '@/components/select-power-plant';
 import { SelectSubstation } from '@/components/select-substation';
 import { SelectTransformer } from '@/components/select-transformer';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -25,8 +26,10 @@ import { usePowerPlants } from '@/hooks/use-power-plants';
 import { useSubstation } from '@/hooks/use-substation';
 import { useTransformers } from '@/hooks/use-transformers';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
 const createCustomerSchema = z.object({
@@ -66,6 +69,8 @@ const customerTypeOptions: Array<{
 ];
 
 const CreateCustomer = () => {
+  const navigate = useNavigate();
+
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const powerCompaniesState = usePowerCompanies();
@@ -98,6 +103,12 @@ const CreateCustomer = () => {
     console.log(values);
     setSubmitError(null);
   };
+
+  const isLoadingHierarchy =
+    powerCompaniesState.isLoadingPowerCompanies ||
+    powerPlantsState.isLoadingPowerPlants ||
+    substationState.isLoadingSubstations ||
+    transformersState.isLoadingTransformers;
 
   return (
     <div className='mx-auto max-w-3xl space-y-6'>
@@ -325,6 +336,29 @@ const CreateCustomer = () => {
                   )}
                 </div>
               </div>
+            </div>
+
+            <div className='flex justify-end gap-3'>
+              <Button
+                type='button'
+                variant='outline'
+                disabled={isSubmitting}
+                onClick={() => navigate('/dashboard')}
+              >
+                Cancel
+              </Button>
+
+              <Button
+                type='submit'
+                disabled={
+                  isSubmitting ||
+                  isLoadingHierarchy ||
+                  !transformersState.selectedTransformerId
+                }
+              >
+                {isSubmitting && <Loader2 className='size-4 animate-spin' />}
+                {isSubmitting ? 'Creating...' : 'Create Customer'}
+              </Button>
             </div>
           </form>
         </CardContent>
