@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { AlertCircle, Loader2 } from 'lucide-react';
-
+import { Loader2 } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -13,10 +12,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  createPowerCompany,
+  type CreatePowerCompanyRequest,
+} from '@/api/power-companies';
+import { FormError } from '@/components/form-error';
 
 const createPowerCompanySchema = z.object({
   longName: z
@@ -40,24 +43,9 @@ const createPowerCompanySchema = z.object({
 
 type CreatePowerCompanyForm = z.infer<typeof createPowerCompanySchema>;
 
-interface CreatePowerCompanyRequest {
-  longName: string;
-  shortName: string;
-  standardRate: number;
-  location: {
-    x: number;
-    y: number;
-  };
-}
-
-interface ApiErrorResponse {
-  message?: string;
-  details?: string;
-}
-
 const CreatePowerCompany = () => {
   const navigate = useNavigate();
-  const [formError, setFormError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
@@ -75,8 +63,6 @@ const CreatePowerCompany = () => {
   });
 
   const onSubmit = async (values: CreatePowerCompanyForm) => {
-    setFormError(null);
-
     const request: CreatePowerCompanyRequest = {
       longName: values.longName,
       shortName: values.shortName,
@@ -88,31 +74,15 @@ const CreatePowerCompany = () => {
     };
 
     try {
-      const response = await fetch('/api/companies', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(request),
-      });
+      setSubmitError(null);
 
-      if (!response.ok) {
-        const errorBody = (await response
-          .json()
-          .catch(() => null)) as ApiErrorResponse | null;
-
-        throw new Error(
-          errorBody?.message ??
-            errorBody?.details ??
-            `Failed to create power company: ${response.status}`,
-        );
-      }
+      await createPowerCompany(request);
 
       navigate('/');
     } catch (error: unknown) {
       console.error(error);
 
-      setFormError(
+      setSubmitError(
         error instanceof Error ? error.message : 'An unexpected error occurred',
       );
     }
@@ -141,12 +111,8 @@ const CreatePowerCompany = () => {
           </CardHeader>
 
           <CardContent className='space-y-7 px-8 pb-8'>
-            {formError && (
-              <Alert variant='destructive'>
-                <AlertCircle className='size-4' />
-                <AlertTitle>Unable to create company</AlertTitle>
-                <AlertDescription>{formError}</AlertDescription>
-              </Alert>
+            {submitError && (
+              <FormError title='Unable to create company' error={submitError} />
             )}
 
             <div className='space-y-3'>

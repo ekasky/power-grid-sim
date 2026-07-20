@@ -13,6 +13,16 @@ export interface PowerCompany {
   };
 }
 
+export interface CreatePowerCompanyRequest {
+  longName: string;
+  shortName: string;
+  standardRate: number;
+  location: {
+    x: number;
+    y: number;
+  };
+}
+
 export interface UpdatePowerCompanyRequest {
   longName: string;
   shortName: string;
@@ -61,7 +71,6 @@ export const deletePowerCompany = async (companyId: string): Promise<void> => {
 
     throw new Error(
       errorBody?.message ??
-        errorBody?.details ??
         `Failed to delete power company: ${response.status}`,
     );
   }
@@ -87,8 +96,35 @@ export const updatePowerCompany = async (
 
     throw new Error(
       errorBody?.message ??
-        errorBody?.details ??
         `Failed to update power company: ${response.status}`,
+    );
+  }
+
+  const data = await response.json();
+
+  return data as PowerCompany;
+};
+
+export const createPowerCompany = async (
+  request: CreatePowerCompanyRequest,
+): Promise<PowerCompany> => {
+  const response = await fetch(`/api/companies`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const errorBody = (await response
+      .json()
+      .catch(() => null)) as ApiErrorResponse | null;
+
+    throw new Error(
+      errorBody?.message ??
+        `Failed to create power company: ${response.status}`,
     );
   }
 
