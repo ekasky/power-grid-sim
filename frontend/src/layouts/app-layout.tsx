@@ -36,6 +36,10 @@ const AppLayout = () => {
           <NavLink to='/create-transformer' className={linkClass}>
             Create Transformer
           </NavLink>
+
+          <NavLink to='/create-customer' className={linkClass}>
+            Create Customer
+          </NavLink>
         </nav>
       </aside>
 

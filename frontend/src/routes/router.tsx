@@ -1,4 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
+import CreateCustomer from '@/pages/create-customer';
 import CreatePowerCompany from '@/pages/create-power-company';
 import CreatePowerPlant from '@/pages/create-power-plant';
 import CreatePowerSubstation from '@/pages/create-power-substation';
@@ -35,6 +36,10 @@ export const router = createBrowserRouter([
       {
         path: '/create-transformer',
         element: <CreateTransformer />,
+      },
+      {
+        path: '/create-customer',
+        element: <CreateCustomer />,
       },
       {
         path: '/power-companies',
