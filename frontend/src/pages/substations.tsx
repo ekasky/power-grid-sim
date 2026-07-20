@@ -7,6 +7,8 @@ import {
 } from '@/api/power-substations';
 import { DeleteActionDialog } from '@/components/delete-action-dialog';
 import { EditPowerSubstationDialog } from '@/components/edit-power-substation-dialog';
+import { EmptyMessage } from '@/components/empty-message';
+import { LoadingMessage } from '@/components/loading-message';
 import { SortableHeader } from '@/components/sortable-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -41,7 +43,6 @@ import {
   type ColumnDef,
   type SortingState,
 } from '@tanstack/react-table';
-import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -550,26 +551,5 @@ const Substations = () => {
     </div>
   );
 };
-
-interface LoadingMessageProps {
-  message: string;
-}
-
-const LoadingMessage = ({ message }: LoadingMessageProps) => (
-  <div className='flex min-h-48 items-center justify-center gap-2 text-muted-foreground'>
-    <Loader2 className='size-5 animate-spin' />
-    {message}
-  </div>
-);
-
-interface EmptyMessageProps {
-  message: string;
-}
-
-const EmptyMessage = ({ message }: EmptyMessageProps) => (
-  <div className='flex min-h-48 items-center justify-center text-muted-foreground'>
-    {message}
-  </div>
-);
 
 export default Substations;

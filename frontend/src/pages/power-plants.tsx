@@ -6,6 +6,8 @@ import {
 } from '@/api/power-plants';
 import { DeleteActionDialog } from '@/components/delete-action-dialog';
 import { EditPowerPlantDialog } from '@/components/edit-power-plant-dialog';
+import { EmptyMessage } from '@/components/empty-message';
+import { LoadingMessage } from '@/components/loading-message';
 import { SortableHeader } from '@/components/sortable-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -40,7 +42,6 @@ import {
   type ColumnDef,
   type SortingState,
 } from '@tanstack/react-table';
-import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -133,8 +134,7 @@ const PowerPlants = () => {
               description={
                 <>
                   This action cannot be undone. The power plant will be
-                  permanently removed from{' '}
-                  {selectedCompany?.longName ?? 'the power company'}.
+                  permanently removed from {plant.plantId ?? 'the power plant'}.
                 </>
               }
               confirmLabel='Delete Power Plant'
@@ -379,19 +379,19 @@ const PowerPlants = () => {
           )}
 
           {isLoadingCompanies ? (
-            <div className='flex min-h-48 items-center justify-center gap-2 text-muted-foreground'>
-              <Loader2 className='size-5 animate-spin' />
-              Loading power companies...
-            </div>
-          ) : powerCompanies.length === 0 ? (
-            <div className='flex min-h-48 items-center justify-center text-muted-foreground'>
-              Create a power company before adding power plants.
-            </div>
+            <LoadingMessage message='Loading power companies...' />
+          ) : companyError ? null : powerCompanies.length === 0 ? (
+            <EmptyMessage message='Create a power company before adding power plants.' />
           ) : isLoadingPlants ? (
-            <div className='flex min-h-48 items-center justify-center gap-2 text-muted-foreground'>
-              <Loader2 className='size-5 animate-spin' />
-              Loading power plants...
-            </div>
+            <LoadingMessage message='Loading power plants...' />
+          ) : plantError ? null : powerPlants.length === 0 ? (
+            <EmptyMessage
+              message={
+                selectedCompany
+                  ? `${selectedCompany.longName} does not have any power plants.`
+                  : 'Select a power company.'
+              }
+            />
           ) : (
             <div className='overflow-hidden rounded-md border'>
               <Table>
@@ -416,34 +416,18 @@ const PowerPlants = () => {
                 </TableHeader>
 
                 <TableBody>
-                  {table.getRowModel().rows.length > 0 ? (
-                    table.getRowModel().rows.map((row) => (
-                      <TableRow key={row.id}>
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell
-                            key={cell.id}
-                            className='whitespace-nowrap'
-                          >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell
-                        colSpan={columns.length}
-                        className='h-32 text-center text-muted-foreground'
-                      >
-                        {selectedCompany
-                          ? `${selectedCompany.longName} does not have any power plants.`
-                          : 'Select a power company.'}
-                      </TableCell>
+                  {table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id} className='whitespace-nowrap'>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
                     </TableRow>
-                  )}
+                  ))}
                 </TableBody>
               </Table>
             </div>

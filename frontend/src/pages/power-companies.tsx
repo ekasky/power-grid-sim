@@ -5,6 +5,8 @@ import {
 } from '@/api/power-companies';
 import { DeleteActionDialog } from '@/components/delete-action-dialog';
 import { EditPowerCompanyDialog } from '@/components/edit-power-company-dialog';
+import { EmptyMessage } from '@/components/empty-message';
+import { LoadingMessage } from '@/components/loading-message';
 import { SortableHeader } from '@/components/sortable-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -32,7 +34,6 @@ import {
   useReactTable,
   type ColumnDef,
 } from '@tanstack/react-table';
-import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -261,15 +262,14 @@ const PowerCompanies = () => {
           )}
 
           {isLoading ? (
-            <div className='flex min-h-48 items-center justify-center gap-2 text-muted-foreground'>
-              <Loader2 className='size-5 animate-spin' />
-              Loading power companies...
-            </div>
+            <LoadingMessage message='Loading power companies...' />
           ) : error ? (
             <Alert variant='destructive'>
               <AlertTitle>Unable to load power companies</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
+          ) : powerCompanies.length === 0 ? (
+            <EmptyMessage message='No power companies have been created.' />
           ) : (
             <div className='overflow-hidden rounded-md border'>
               <Table>
@@ -294,32 +294,18 @@ const PowerCompanies = () => {
                 </TableHeader>
 
                 <TableBody>
-                  {table.getRowModel().rows.length > 0 ? (
-                    table.getRowModel().rows.map((row) => (
-                      <TableRow key={row.id}>
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell
-                            key={cell.id}
-                            className='whitespace-nowrap'
-                          >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell
-                        colSpan={columns.length}
-                        className='h-32 text-center text-muted-foreground'
-                      >
-                        No power companies have been created.
-                      </TableCell>
+                  {table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id} className='whitespace-nowrap'>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
                     </TableRow>
-                  )}
+                  ))}
                 </TableBody>
               </Table>
             </div>
