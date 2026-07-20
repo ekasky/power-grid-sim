@@ -1,13 +1,13 @@
 package com.evankasky.backend.controller;
 
 import com.evankasky.backend.dto.CountResponse;
+import com.evankasky.backend.dto.customer.CreateCustomerRequest;
 import com.evankasky.backend.dto.customer.CustomerResponse;
 import com.evankasky.backend.mapper.CustomerMapper;
+import com.evankasky.backend.model.Customer;
 import com.evankasky.backend.service.CustomerService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -54,6 +54,15 @@ public class CustomerController {
                 .stream()
                 .map(customerMapper::toResponse)
                 .toList();
+    }
+
+    @PostMapping("/transformers/{transformerId}/customers")
+    public CustomerResponse createCustomer(
+            @PathVariable UUID transformerId,
+            @Valid @RequestBody CreateCustomerRequest request
+    ) {
+        Customer customer = customerService.createCustomer(transformerId, request);
+        return customerMapper.toResponse(customer);
     }
 
 }
