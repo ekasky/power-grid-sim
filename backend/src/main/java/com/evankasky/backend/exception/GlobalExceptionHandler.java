@@ -1,6 +1,8 @@
 package com.evankasky.backend.exception;
 
 import com.evankasky.backend.dto.exception.PowerGridSimulationExceptionApiResponse;
+import com.evankasky.backend.exception.customer.CustomerExistsException;
+import com.evankasky.backend.exception.customer.CustomerNotFoundException;
 import com.evankasky.backend.exception.powercompany.PowerCompanyExistsException;
 import com.evankasky.backend.exception.powercompany.PowerCompanyNotFoundException;
 import com.evankasky.backend.exception.powerplant.PowerPlantExistsException;
@@ -118,6 +120,32 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TransformerNotFoundException.class)
     public ResponseEntity<PowerGridSimulationExceptionApiResponse> handleTransformerNotFoundException(
             TransformerNotFoundException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.NOT_FOUND,
+                exception.getMessage(),
+                request.getRequestURI(),
+                Map.of()
+        );
+    }
+
+    @ExceptionHandler(CustomerExistsException.class)
+    public ResponseEntity<PowerGridSimulationExceptionApiResponse> handleCustomerExistsException(
+            CustomerExistsException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.CONFLICT,
+                exception.getMessage(),
+                request.getRequestURI(),
+                Map.of()
+        );
+    }
+
+    @ExceptionHandler(CustomerNotFoundException.class)
+    public ResponseEntity<PowerGridSimulationExceptionApiResponse> handleCustomerNotFoundException(
+            CustomerNotFoundException exception,
             HttpServletRequest request
     ) {
         return buildResponse(
