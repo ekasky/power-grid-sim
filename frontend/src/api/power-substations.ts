@@ -3,8 +3,18 @@ import type { ApiErrorResponse } from '@/api/error';
 export interface PowerSubstation {
   id: string;
   substationId: string;
-  initialInstallationCost: number | string;
+  initialBuildCost: number | string;
   recurringMaintenanceCost: number | string;
+  location: {
+    x: number;
+    y: number;
+  };
+}
+
+export interface CreatePowerSubstationRequest {
+  substationId: string;
+  initialBuildCost: number;
+  recurringMaintenanceCost: number;
   location: {
     x: number;
     y: number;
@@ -13,7 +23,7 @@ export interface PowerSubstation {
 
 export interface UpdatePowerSubstationRequest {
   substationId: string;
-  initialInstallationCost: number;
+  initialBuildCost: number;
   recurringMaintenanceCost: number;
   location: {
     x: number;
@@ -97,6 +107,39 @@ export const updatePowerSubstation = async (
     throw new Error(
       errorBody?.message ||
         `Failed to update power substation: ${response.status}`,
+    );
+  }
+
+  const data = await response.json();
+
+  if (!data) {
+    throw new Error('Invalid power substation response');
+  }
+
+  return data as PowerSubstation;
+};
+
+export const createPowerSubstation = async (
+  powerPlantId: string,
+  request: CreatePowerSubstationRequest,
+): Promise<PowerSubstation> => {
+  const response = await fetch(`/api/plants/${powerPlantId}/substations`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const errorBody = (await response
+      .json()
+      .catch(() => null)) as ApiErrorResponse | null;
+
+    throw new Error(
+      errorBody?.message ||
+        `Failed to create power substation: ${response.status}`,
     );
   }
 

@@ -67,7 +67,7 @@ export const EditPowerSubstationDialog = ({
     resolver: zodResolver(updatePowerSubstationSchema),
     defaultValues: {
       substationId: substation.substationId,
-      initialInstallationCost: Number(substation.initialInstallationCost),
+      initialInstallationCost: Number(substation.initialBuildCost),
       recurringMaintenanceCost: Number(substation.recurringMaintenanceCost),
       x: substation.location.x,
       y: substation.location.y,
@@ -82,7 +82,7 @@ export const EditPowerSubstationDialog = ({
 
       reset({
         substationId: substation.substationId,
-        initialInstallationCost: Number(substation.initialInstallationCost),
+        initialInstallationCost: Number(substation.initialBuildCost),
         recurringMaintenanceCost: Number(substation.recurringMaintenanceCost),
         x: substation.location.x,
         y: substation.location.y,
@@ -95,7 +95,7 @@ export const EditPowerSubstationDialog = ({
 
     const request: UpdatePowerSubstationRequest = {
       substationId: values.substationId,
-      initialInstallationCost: values.initialInstallationCost,
+      initialBuildCost: values.initialInstallationCost,
       recurringMaintenanceCost: values.recurringMaintenanceCost,
       location: {
         x: values.x,

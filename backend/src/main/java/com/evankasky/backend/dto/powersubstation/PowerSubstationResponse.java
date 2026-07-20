@@ -13,7 +13,7 @@ public record PowerSubstationResponse(
         String powerCompanyShortName,
         UUID powerPlantId,
         String plantId,
-        BigDecimal initialInstallationCost,
+        BigDecimal initialBuildCost,
         BigDecimal recurringMaintenanceCost,
         LocationResponse location
 

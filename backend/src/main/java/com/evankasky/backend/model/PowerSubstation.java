@@ -27,8 +27,8 @@ public class PowerSubstation {
     @Column(name = "substation_id", nullable = false)
     private String substationId;
 
-    @Column(name = "initial_installation_cost", nullable = false, precision = 19, scale = 4)
-    private BigDecimal initialInstallationCost;
+    @Column(name = "initial_build_cost", nullable = false, precision = 19, scale = 4)
+    private BigDecimal initialBuildCost;
 
     @Column(name = "recurring_maintenance_cost", nullable = false, precision = 19, scale = 4)
     private BigDecimal recurringMaintenanceCost;
@@ -56,7 +56,7 @@ public class PowerSubstation {
             Location location
     ) {
         this.substationId = substationId;
-        this.initialInstallationCost = initialBuildCost;
+        this.initialBuildCost = initialBuildCost;
         this.recurringMaintenanceCost = recurringMaintenanceCost;
         this.location = location;
     }
@@ -95,12 +95,12 @@ public class PowerSubstation {
         return substationId;
     }
 
-    public void setInitialInstallationCost(BigDecimal initialInstallationCost) {
-        this.initialInstallationCost = initialInstallationCost;
+    public void setInitialBuildCost(BigDecimal initialBuildCost) {
+        this.initialBuildCost = initialBuildCost;
     }
 
-    public BigDecimal getInitialInstallationCost() {
-        return initialInstallationCost;
+    public BigDecimal getInitialBuildCost() {
+        return initialBuildCost;
     }
 
     public void setRecurringMaintenanceCost(BigDecimal recurringMaintenanceCost) {

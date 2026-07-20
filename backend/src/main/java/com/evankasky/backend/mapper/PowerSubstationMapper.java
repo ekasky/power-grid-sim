@@ -21,7 +21,7 @@ public class PowerSubstationMapper {
                 powerSubstation.getPowerPlant().getCompany().getShortName(),
                 powerSubstation.getPowerPlant().getId(),
                 powerSubstation.getPowerPlant().getPlantId(),
-                powerSubstation.getInitialInstallationCost(),
+                powerSubstation.getInitialBuildCost(),
                 powerSubstation.getRecurringMaintenanceCost(),
                 locationResponse
         );

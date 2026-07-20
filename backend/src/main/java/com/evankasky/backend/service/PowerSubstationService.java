@@ -1,7 +1,6 @@
 package com.evankasky.backend.service;
 
 import com.evankasky.backend.dto.powersubstation.CreatePowerSubstationRequest;
-import com.evankasky.backend.dto.powersubstation.PowerSubstationResponse;
 import com.evankasky.backend.dto.powersubstation.UpdatePowerSubstationRequest;
 import com.evankasky.backend.exception.powercompany.PowerCompanyNotFoundException;
 import com.evankasky.backend.exception.powerplant.PowerPlantNotFoundException;
@@ -106,7 +105,7 @@ public class PowerSubstationService {
 
         PowerSubstation powerSubstation = new PowerSubstation(
                 substationId,
-                request.initialInstallationCost(),
+                request.initialBuildCost(),
                 request.recurringMaintenanceCost(),
                 location
         );
@@ -145,8 +144,8 @@ public class PowerSubstationService {
 
         }
 
-        if(request.initialInstallationCost() != null) {
-            powerSubstation.setInitialInstallationCost(request.initialInstallationCost());
+        if(request.initialBuildCost() != null) {
+            powerSubstation.setInitialBuildCost(request.initialBuildCost());
         }
 
         if(request.recurringMaintenanceCost() != null) {

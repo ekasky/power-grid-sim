@@ -124,12 +124,12 @@ const Substations = () => {
     },
     {
       id: 'initialInstallationCost',
-      accessorFn: (substation) => Number(substation.initialInstallationCost),
+      accessorFn: (substation) => Number(substation.initialBuildCost),
       header: ({ column }) => (
         <SortableHeader column={column} title='Installation Cost' />
       ),
       cell: ({ row }) =>
-        currencyFormatter.format(Number(row.original.initialInstallationCost)),
+        currencyFormatter.format(Number(row.original.initialBuildCost)),
     },
     {
       id: 'recurringMaintenanceCost',

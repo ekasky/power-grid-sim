@@ -14,8 +14,8 @@ public record UpdatePowerSubstationRequest(
         @Size(max = 20, message = "Substation ID cannot exceed 20 characters")
         String substationId,
 
-        @DecimalMin(value = "0.0", inclusive = true, message = "Initial installation cost cannot be negative")
-        BigDecimal initialInstallationCost,
+        @DecimalMin(value = "0.0", inclusive = true, message = "Initial build cost cannot be negative")
+        BigDecimal initialBuildCost,
 
         @DecimalMin(value = "0.0", inclusive = true, message = "Recurring Maintenance cost cannot be negative")
         BigDecimal recurringMaintenanceCost,

@@ -15,9 +15,9 @@ public record CreatePowerSubstationRequest(
         @Size(max = 20, message = "Substation cannot exceed 20 characters")
         String substationId,
 
-        @NotNull(message = "Initial installation cost is required")
-        @DecimalMin(value = "0.0", inclusive = true, message = "Initial installation cost cannot be negative")
-        BigDecimal initialInstallationCost,
+        @NotNull(message = "Initial build cost is required")
+        @DecimalMin(value = "0.0", inclusive = true, message = "Initial build cost cannot be negative")
+        BigDecimal initialBuildCost,
 
         @NotNull(message = "Recurring generation cost is required")
         @DecimalMin(value = "0.0", inclusive = true, message = "Recurring maintenance cost cannot be negative")
