@@ -153,13 +153,6 @@ public class PowerSubstationService {
                 )
         );
 
-        gridRules.validateDistance(
-                powerSubstation.getPowerPlant().getLocation(),
-                powerSubstation.getLocation(),
-                GridRules.MAX_PLANT_TO_SUBSTATION_DISTANCE,
-                "Power plant to substation"
-        );
-
         UUID powerPlantId = powerSubstation.getPowerPlant().getId();
 
         if(request.substationId() != null) {
@@ -186,6 +179,13 @@ public class PowerSubstationService {
         }
 
         if (request.location() != null) {
+
+            gridRules.validateDistance(
+                    powerSubstation.getPowerPlant().getLocation(),
+                    powerSubstation.getLocation(),
+                    GridRules.MAX_PLANT_TO_SUBSTATION_DISTANCE,
+                    "Power plant to substation"
+            );
 
             Location currentLocation = powerSubstation.getLocation();
 
