@@ -34,8 +34,8 @@ public abstract class Customer {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "billing_rate", nullable = false, precision = 19, scale = 4)
-    private BigDecimal billingRate;
+    @Column(name = "custom_billing_rate", nullable = true, precision = 19, scale = 4)
+    private BigDecimal customBillingRate;
 
     @Embedded
     private Location location;
@@ -53,12 +53,10 @@ public abstract class Customer {
     protected Customer(
             String accountNumber,
             String name,
-            BigDecimal billingRate,
             Location location
     ) {
         this.accountNumber = accountNumber;
         this.name = name;
-        this.billingRate = billingRate;
         this.location = location;
     }
 
@@ -84,7 +82,15 @@ public abstract class Customer {
      *                                            Customer Methods
      ***************************************************************************************************************** */
 
+    public BigDecimal getEffectiveBillingRate() {
 
+        if(customBillingRate != null) {
+            return customBillingRate;
+        }
+
+        return transformer.getPowerSubstation().getPowerPlant().getCompany().getStandardRate();
+
+    }
 
     /* *****************************************************************************************************************
      *                                               Getters and Setters
@@ -110,12 +116,12 @@ public abstract class Customer {
         return name;
     }
 
-    public void setBillingRate(BigDecimal billingRate) {
-        this.billingRate = billingRate;
+    public void setCustomBillingRate(BigDecimal customBillingRate) {
+        this.customBillingRate = customBillingRate;
     }
 
-    public BigDecimal getBillingRate() {
-        return billingRate;
+    public BigDecimal getCustomBillingRate() {
+        return customBillingRate;
     }
 
     public void setLocation(Location location) {

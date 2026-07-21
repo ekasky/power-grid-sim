@@ -8,6 +8,8 @@ export interface Customer {
   accountNumber: string;
   name: string;
   customerType: CustomerType;
+  customBillingRate: number | string | null;
+  effectiveBillingRate: number | string;
   location: {
     x: number;
     y: number;
@@ -18,6 +20,7 @@ export interface CreateCustomerRequest {
   accountNumber: string;
   name: string;
   customerType: CustomerType;
+  customBillingRate: number | null;
   location: {
     x: number;
     y: number;

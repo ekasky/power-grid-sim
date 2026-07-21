@@ -3,9 +3,12 @@ package com.evankasky.backend.dto.customer;
 import com.evankasky.backend.dto.location.LocationRequest;
 import com.evankasky.backend.model.CustomerType;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+
+import java.math.BigDecimal;
 
 public record CreateCustomerRequest(
 
@@ -19,6 +22,9 @@ public record CreateCustomerRequest(
 
         @NotNull(message = "Customer type is required")
         CustomerType customerType,
+
+        @DecimalMin(value = "0.0", inclusive = true, message = "Custom billing rate cannot be negative")
+        BigDecimal customBillingRate,
 
         @NotNull(message = "Location is required")
         @Valid

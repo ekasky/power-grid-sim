@@ -51,6 +51,11 @@ const createCustomerSchema = z.object({
 
   customerType: z.enum(['RESIDENTIAL', 'COMMERCIAL']),
 
+  customBillingRate: z
+    .number()
+    .min(0, 'Custom billing rate cannot be negative')
+    .optional(),
+
   x: z.number().int('X coordinate must be a integer'),
 
   y: z.number().int('Y coordinate must be a integer'),
@@ -97,6 +102,7 @@ const CreateCustomer = () => {
       accountNumber: '',
       name: '',
       customerType: 'RESIDENTIAL',
+      customBillingRate: undefined,
       x: 0,
       y: 0,
     },
@@ -114,6 +120,7 @@ const CreateCustomer = () => {
       accountNumber: values.accountNumber.trim(),
       name: values.name.trim(),
       customerType: values.customerType,
+      customBillingRate: values.customBillingRate ?? null,
       location: {
         x: values.x,
         y: values.y,
@@ -312,6 +319,47 @@ const CreateCustomer = () => {
                   {errors.customerType && (
                     <p className='text-sm text-destructive'>
                       {errors.customerType.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className='space-y-2 sm:col-span-2'>
+                  <Label htmlFor='customBillingRate'>
+                    Custom billing rate
+                    <span className='ml-1 font-normal text-muted-foreground'>
+                      (optional)
+                    </span>
+                  </Label>
+
+                  <div className='relative'>
+                    <span className='pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground'>
+                      $
+                    </span>
+
+                    <Input
+                      id='customBillingRate'
+                      type='number'
+                      min='0'
+                      step='0.0001'
+                      className='h-11 pl-8'
+                      placeholder='Use company standard rate'
+                      disabled={isSubmitting}
+                      aria-invalid={Boolean(errors.customBillingRate)}
+                      {...register('customBillingRate', {
+                        setValueAs: (value) =>
+                          value === '' ? undefined : Number(value),
+                      })}
+                    />
+                  </div>
+
+                  <p className='text-sm text-muted-foreground'>
+                    Leave blank to use the selected power company's standard
+                    rate.
+                  </p>
+
+                  {errors.customBillingRate && (
+                    <p className='text-sm text-destructive'>
+                      {errors.customBillingRate.message}
                     </p>
                   )}
                 </div>

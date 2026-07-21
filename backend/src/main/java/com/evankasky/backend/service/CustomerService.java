@@ -1,7 +1,6 @@
 package com.evankasky.backend.service;
 
 import com.evankasky.backend.dto.customer.CreateCustomerRequest;
-import com.evankasky.backend.dto.customer.CustomerResponse;
 import com.evankasky.backend.dto.customer.UpdateCustomerRequest;
 import com.evankasky.backend.exception.customer.CustomerExistsException;
 import com.evankasky.backend.exception.customer.CustomerNotFoundException;
@@ -14,7 +13,9 @@ import com.evankasky.backend.validation.GridRules;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -59,6 +60,7 @@ public class CustomerService {
             CreateCustomerRequest request
     ) {
 
+        // Check if account number is already in use
         String accountNumber = request.accountNumber().trim();
         String name = request.name().trim();
 
@@ -69,12 +71,14 @@ public class CustomerService {
             );
         }
 
+        // Get the transformer being connected to
         Transformer transformer = transformerRepo.findById(transformerId)
                 .orElseThrow(() -> new TransformerNotFoundException(
                         "Transformer '" + transformerId + "' not found"
                 )
         );
 
+        // Validate that the customer distance is close enough to the transformer
         Location location = new Location(request.location().x(), request.location().y());
 
         gridRules.validateDistance(
@@ -84,6 +88,7 @@ public class CustomerService {
                 "Transformer to customer"
         );
 
+        // Ensure  that the transformer is not at its capacity
         long customerCount = customerRepo.countByTransformer_id(transformerId);
 
         if(customerCount >= GridRules.MAX_CUSTOMERS_PER_TRANSFORMER) {
@@ -93,11 +98,24 @@ public class CustomerService {
             );
         }
 
+        // Set the type of customer being created
         Customer customer = switch (request.customerType()) {
             case RESIDENTIAL -> new ResidentialCustomer(accountNumber, name, location);
             case COMMERCIAL -> new CommercialCustomer(accountNumber, name, location);
         };
 
+        // Set the billing rate if different from standard rate
+
+        BigDecimal requestedRate = request.customBillingRate();
+        BigDecimal standardRate = transformer.getPowerSubstation().getPowerPlant().getCompany().getStandardRate();
+
+        if(requestedRate != null && requestedRate.compareTo(standardRate) != 0) {
+            customer.setCustomBillingRate(request.customBillingRate());
+        } else {
+            customer.setCustomBillingRate(null);
+        }
+
+        // Save the customer
         customer.setTransformer(transformer);
         return customerRepo.save(customer);
 
@@ -109,12 +127,14 @@ public class CustomerService {
             UpdateCustomerRequest request
     ) {
 
+        // Get customer to update
         Customer customer = customerRepo.findById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException(
                         "Customer '" + customerId + "' not found"
                 )
         );
 
+        // Update account number
         if(request.accountNumber() != null) {
 
             String accountNumber = request.accountNumber().trim();
@@ -129,10 +149,19 @@ public class CustomerService {
 
         }
 
+        // Update name
         if(request.name() != null) {
             customer.setName(request.name().trim());
         }
 
+        // Update custom billing rate
+        if(Boolean.TRUE.equals(request.useStandardBillingRate())) {
+            customer.setCustomBillingRate(null);
+        } else if(request.customBillingRate() != null) {
+            customer.setCustomBillingRate(request.customBillingRate());
+        }
+
+        // Update location
         if (request.location() != null) {
             Location currentLocation = customer.getLocation();
 
