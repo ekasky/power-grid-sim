@@ -8,8 +8,8 @@ import java.util.UUID;
 
 public interface UsageRecordRepo extends JpaRepository<UsageRecord, UUID> {
 
-    boolean existsByCustomer_IdAndBillingCycle(UUID customerId, int billingCycle);
-    List<UsageRecord> findAllByBillingCycle(int billingCycle);
-    List<UsageRecord> findAllByCustomer_IdOrderByBillingCycleAsc(UUID customerId);
+    boolean existsByCustomer_IdAndBillingCycle_Id(UUID customerId, UUID billingCycleId);
+    List<UsageRecord> findAllByBillingCycle_Id(UUID billingCycleId);
+    List<UsageRecord> findAllByCustomer_IdOrderByBillingCycle_CycleNumberAsc(UUID customerId);
 
 }

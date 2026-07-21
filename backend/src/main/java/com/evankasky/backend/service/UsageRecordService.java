@@ -2,6 +2,8 @@ package com.evankasky.backend.service;
 
 import com.evankasky.backend.exception.PowerGridSimulationLogicalException;
 import com.evankasky.backend.exception.usagerecord.UsageRecordExistsException;
+import com.evankasky.backend.model.BillingCycle;
+import com.evankasky.backend.model.BillingCycleStatus;
 import com.evankasky.backend.model.Customer;
 import com.evankasky.backend.model.UsageRecord;
 import com.evankasky.backend.repository.UsageRecordRepo;
@@ -26,17 +28,27 @@ public class UsageRecordService {
      *                                        Power Substation Service Methods
      ***************************************************************************************************************** */
 
-     public UsageRecord createUsageRecord(Customer customer, int billingCycle, BigDecimal kwhUsed) {
+     public UsageRecord createUsageRecord(Customer customer, BillingCycle billingCycle, BigDecimal kwhUsed) {
 
-         if(billingCycle < 1) {
-             throw new PowerGridSimulationLogicalException("Billing cycle must be greater than zero");
+         if(customer == null) {
+             throw new PowerGridSimulationLogicalException("Customer is required");
+         }
+
+         if(billingCycle == null) {
+             throw new PowerGridSimulationLogicalException("Billing cycle is required");
+         }
+
+         if (billingCycle.getStatus() != BillingCycleStatus.OPEN) {
+             throw new PowerGridSimulationLogicalException(
+                     "Usage records can only be created for an open billing cycle"
+             );
          }
 
          if(kwhUsed == null || kwhUsed.signum() < 0) {
              throw new PowerGridSimulationLogicalException("Power usage cannot be negative");
          }
 
-         boolean alreadyExists = usageRecordRepo.existsByCustomer_IdAndBillingCycle(customer.getId(), billingCycle);
+         boolean alreadyExists = usageRecordRepo.existsByCustomer_IdAndBillingCycle_Id(customer.getId(), billingCycle.getId());
 
          if(alreadyExists) {
              throw new UsageRecordExistsException(

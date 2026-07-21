@@ -11,7 +11,7 @@ import java.util.UUID;
         name = "usage_record",
         uniqueConstraints = @UniqueConstraint(
                 name = "uk_usage_record_customer_cycle",
-                columnNames = {"customer_id", "billing_cycle"}
+                columnNames = {"customer_id", "billing_cycle_id"}
         )
 )
 public class UsageRecord {
@@ -25,8 +25,9 @@ public class UsageRecord {
     @Column(name = "kwh_used", nullable = false, precision = 12, scale = 4)
     private BigDecimal kwhUsed;
 
-    @Column(name = "billing_cycle", nullable = false)
-    private int billingCycle;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "billing_cycle_id", nullable = false, updatable = false)
+    private BillingCycle billingCycle;
 
     @Column(name = "billing_rate", nullable = false, precision = 12, scale = 4)
     private BigDecimal billingRate;
@@ -42,7 +43,7 @@ public class UsageRecord {
     protected UsageRecord() { }
 
     public UsageRecord(
-            int billingCycle,
+            BillingCycle billingCycle,
             BigDecimal billingRate,
             BigDecimal kwhUsed,
             Customer customer
@@ -67,11 +68,11 @@ public class UsageRecord {
         return id;
     }
 
-    public void setBillingCycle(int billingCycle) {
+    public void setBillingCycle(BillingCycle billingCycle) {
         this.billingCycle = billingCycle;
     }
 
-    public int getBillingCycle() {
+    public BillingCycle getBillingCycle() {
         return billingCycle;
     }
 
