@@ -5,9 +5,11 @@ import com.evankasky.backend.model.BillingCycle;
 import com.evankasky.backend.model.Customer;
 import com.evankasky.backend.repository.BillingCycleRepo;
 import com.evankasky.backend.repository.CustomerRepo;
+import com.evankasky.backend.simulation.UsageGenerator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -16,6 +18,7 @@ public class BillingCycleService {
     private final BillingCycleRepo billingCycleRepo;
     private final CustomerRepo customerRepo;
     private final UsageRecordService usageRecordService;
+    private final UsageGenerator usageGenerator;
 
     /* *****************************************************************************************************************
      *                                              Constructors
@@ -24,11 +27,13 @@ public class BillingCycleService {
     public BillingCycleService(
             BillingCycleRepo billingCycleRepo,
             CustomerRepo customerRepo,
-            UsageRecordService usageRecordService
+            UsageRecordService usageRecordService,
+            UsageGenerator usageGenerator
     ) {
         this.billingCycleRepo = billingCycleRepo;
         this.customerRepo = customerRepo;
         this.usageRecordService = usageRecordService;
+        this.usageRecordService = usageGenerator;
     }
 
     /* *****************************************************************************************************************

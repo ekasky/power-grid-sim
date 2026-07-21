@@ -59,14 +59,7 @@ public class UsageRecord {
      *                                            Usage Record Methods
      ***************************************************************************************************************** */
 
-    public BigDecimal generateUsage(Customer customer) {
 
-        return switch (customer.getCustomerType()) {
-            case RESIDENTIAL -> BigDecimal.valueOf(ThreadLocalRandom.current().nextDouble(300.0, 1001.0));
-            case COMMERCIAL -> BigDecimal.valueOf(ThreadLocalRandom.current().nextDouble(1001.0, 10001.0));
-        };
-
-    }
 
     /* *****************************************************************************************************************
      *                                               Getters and Setters
