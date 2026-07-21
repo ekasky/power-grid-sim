@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/select';
 import { useEntityList } from '@/hooks/use-entity-list';
 import { usePowerCompanies } from '@/hooks/use-power-companies';
+import { currencyFormatter } from '@/lib/formatters';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useCallback, useMemo } from 'react';
 
@@ -79,6 +80,23 @@ export const Customers = () => {
             {row.original.customerType.toLowerCase()}
           </span>
         ),
+      },
+      {
+        accessorKey: 'effectiveBillingRate',
+        header: ({ column }) => (
+          <SortableHeader column={column} title='Billing Rate' />
+        ),
+        cell: ({ row }) => {
+          const rate = Number(row.original.effectiveBillingRate);
+
+          return (
+            <span>
+              {Number.isFinite(rate)
+                ? `${currencyFormatter.format(rate)} / kWh`
+                : '—'}
+            </span>
+          );
+        },
       },
       {
         id: 'location',
