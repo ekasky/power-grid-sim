@@ -6,12 +6,14 @@ import com.evankasky.backend.exception.powercompany.PowerCompanyNotFoundExceptio
 import com.evankasky.backend.exception.powerplant.PowerPlantNotFoundException;
 import com.evankasky.backend.exception.powersubstation.PowerSubstationExistsException;
 import com.evankasky.backend.exception.powersubstation.PowerSubstationNotFoundException;
+import com.evankasky.backend.exception.validation.GridCapacityExceededException;
 import com.evankasky.backend.model.Location;
 import com.evankasky.backend.model.PowerPlant;
 import com.evankasky.backend.model.PowerSubstation;
 import com.evankasky.backend.repository.PowerCompanyRepo;
 import com.evankasky.backend.repository.PowerPlantRepo;
 import com.evankasky.backend.repository.PowerSubstationRepo;
+import com.evankasky.backend.validation.GridRules;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -88,6 +90,15 @@ public class PowerSubstationService {
                     "Power plant '" + powerPlantId + "' not found"
                 )
         );
+
+        long currentSubstationCount = powerSubstationRepo.countByPowerPlant_Id(powerPlantId);
+
+        if(currentSubstationCount >= GridRules.MAX_SUBSTATIONS_PER_PLANT) {
+            throw new GridCapacityExceededException(
+                    "Power plant '" + powerPlant.getPlantId() + "' already supports the " +
+                            "maximum of 20 substations"
+            );
+        }
 
         String substationId = request.substationId().trim();
 

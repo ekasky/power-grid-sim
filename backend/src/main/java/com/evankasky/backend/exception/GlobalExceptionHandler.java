@@ -11,6 +11,8 @@ import com.evankasky.backend.exception.powersubstation.PowerSubstationExistsExce
 import com.evankasky.backend.exception.powersubstation.PowerSubstationNotFoundException;
 import com.evankasky.backend.exception.transformer.TransformerExistsException;
 import com.evankasky.backend.exception.transformer.TransformerNotFoundException;
+import com.evankasky.backend.exception.validation.GridCapacityExceededException;
+import com.evankasky.backend.exception.validation.InvalidGridConnectionException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -150,6 +152,32 @@ public class GlobalExceptionHandler {
     ) {
         return buildResponse(
                 HttpStatus.NOT_FOUND,
+                exception.getMessage(),
+                request.getRequestURI(),
+                Map.of()
+        );
+    }
+
+    @ExceptionHandler(InvalidGridConnectionException.class)
+    public ResponseEntity<PowerGridSimulationExceptionApiResponse> handleInvalidGridConnectionException(
+            InvalidGridConnectionException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                exception.getMessage(),
+                request.getRequestURI(),
+                Map.of()
+        );
+    }
+
+    @ExceptionHandler(GridCapacityExceededException.class)
+    public ResponseEntity<PowerGridSimulationExceptionApiResponse> handleGridCapacityExceededException(
+            GridCapacityExceededException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
                 exception.getMessage(),
                 request.getRequestURI(),
                 Map.of()
