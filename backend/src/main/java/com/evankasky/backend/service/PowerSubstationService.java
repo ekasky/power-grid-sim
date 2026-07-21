@@ -180,13 +180,6 @@ public class PowerSubstationService {
 
         if (request.location() != null) {
 
-            gridRules.validateDistance(
-                    powerSubstation.getPowerPlant().getLocation(),
-                    powerSubstation.getLocation(),
-                    GridRules.MAX_PLANT_TO_SUBSTATION_DISTANCE,
-                    "Power plant to substation"
-            );
-
             Location currentLocation = powerSubstation.getLocation();
 
             int requestedX = request.location().x();
@@ -210,10 +203,20 @@ public class PowerSubstationService {
             }
 
             if (locationChanged) {
-                powerSubstation.setLocation(
-                        new Location(requestedX, requestedY)
+
+                Location location = new Location(requestedX, requestedY);
+
+                gridRules.validateDistance(
+                        powerSubstation.getPowerPlant().getLocation(),
+                        location,
+                        GridRules.MAX_PLANT_TO_SUBSTATION_DISTANCE,
+                        "Power plant to substation"
                 );
+
+                powerSubstation.setLocation(location);
+
             }
+
         }
 
         return powerSubstation;

@@ -12,9 +12,11 @@ import com.evankasky.backend.exception.powersubstation.PowerSubstationExistsExce
 import com.evankasky.backend.exception.powersubstation.PowerSubstationNotFoundException;
 import com.evankasky.backend.exception.powersubstation.SubstationLocationLockedException;
 import com.evankasky.backend.exception.transformer.TransformerExistsException;
+import com.evankasky.backend.exception.transformer.TransformerLocationLockedException;
 import com.evankasky.backend.exception.transformer.TransformerNotFoundException;
 import com.evankasky.backend.exception.validation.GridCapacityExceededException;
 import com.evankasky.backend.exception.validation.InvalidGridConnectionException;
+import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -154,6 +156,19 @@ public class GlobalExceptionHandler {
     ) {
         return buildResponse(
                 HttpStatus.NOT_FOUND,
+                exception.getMessage(),
+                request.getRequestURI(),
+                Map.of()
+        );
+    }
+
+    @ExceptionHandler(TransformerLocationLockedException.class)
+    public ResponseEntity<PowerGridSimulationExceptionApiResponse> handleTransformerLocationLockedException(
+            TransformerLocationLockedException exception,
+            HttpServletRequest  request
+    ) {
+        return buildResponse(
+                HttpStatus.FORBIDDEN,
                 exception.getMessage(),
                 request.getRequestURI(),
                 Map.of()

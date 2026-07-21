@@ -1,20 +1,19 @@
 package com.evankasky.backend.service;
 
+import com.evankasky.backend.dto.customer.CustomerResponse;
 import com.evankasky.backend.dto.transformer.CreateTransformerRequest;
 import com.evankasky.backend.dto.transformer.UpdateTransformerRequest;
 import com.evankasky.backend.exception.powercompany.PowerCompanyNotFoundException;
 import com.evankasky.backend.exception.powerplant.PowerPlantNotFoundException;
 import com.evankasky.backend.exception.powersubstation.PowerSubstationNotFoundException;
 import com.evankasky.backend.exception.transformer.TransformerExistsException;
+import com.evankasky.backend.exception.transformer.TransformerLocationLockedException;
 import com.evankasky.backend.exception.transformer.TransformerNotFoundException;
 import com.evankasky.backend.exception.validation.GridCapacityExceededException;
 import com.evankasky.backend.model.Location;
 import com.evankasky.backend.model.PowerSubstation;
 import com.evankasky.backend.model.Transformer;
-import com.evankasky.backend.repository.PowerCompanyRepo;
-import com.evankasky.backend.repository.PowerPlantRepo;
-import com.evankasky.backend.repository.PowerSubstationRepo;
-import com.evankasky.backend.repository.TransformerRepo;
+import com.evankasky.backend.repository.*;
 import com.evankasky.backend.validation.GridRules;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +28,8 @@ public class TransformerService {
     private final PowerPlantRepo powerPlantRepo;
     private final PowerSubstationRepo powerSubstationRepo;
     private final TransformerRepo transformerRepo;
+    private final CustomerRepo customerRepo;
+    private final GridRules gridRules;
 
     /* *****************************************************************************************************************
      *                                              Constructors
@@ -38,12 +39,16 @@ public class TransformerService {
             PowerCompanyRepo powerCompanyRepo,
             PowerPlantRepo powerPlantRepo,
             PowerSubstationRepo powerSubstationRepo,
-            TransformerRepo transformerRepo
+            TransformerRepo transformerRepo,
+            CustomerRepo customerRepo,
+            GridRules gridRules
     ) {
         this.powerCompanyRepo = powerCompanyRepo;
         this.powerPlantRepo = powerPlantRepo;
         this.powerSubstationRepo = powerSubstationRepo;
         this.transformerRepo = transformerRepo;
+        this.customerRepo = customerRepo;
+        this.gridRules = gridRules;
     }
 
     /* *****************************************************************************************************************
@@ -120,6 +125,18 @@ public class TransformerService {
             );
         }
 
+        Location location = new Location(
+                request.location().x(),
+                request.location().y()
+        );
+
+        gridRules.validateDistance(
+                powerSubstation.getLocation(),
+                location,
+                GridRules.MAX_SUBSTATION_TO_TRANSFORMER_DISTANCE,
+                "Substation to transformer"
+        );
+
         String transformerId = request.transformerId().trim();
 
         if(transformerRepo.existsByPowerSubstation_IdAndTransformerId(powerSubstationId, transformerId)) {
@@ -128,11 +145,6 @@ public class TransformerService {
                             powerSubstationId + "'"
             );
         }
-
-        Location location = new Location(
-                request.location().x(),
-                request.location().y()
-        );
 
         Transformer transformer = new Transformer(
                 transformerId,
@@ -191,9 +203,42 @@ public class TransformerService {
         }
 
         if (request.location() != null) {
-            transformer.setLocation(
-                    new Location(request.location().x(), request.location().y())
-            );
+
+            Location currentLocation = transformer.getLocation();
+
+            int requestedX = request.location().x();
+            int requestedY = request.location().y();
+
+            boolean locationChanged =
+                    currentLocation.getX() != requestedX
+                            || currentLocation.getY() != requestedY;
+
+            if (
+                    locationChanged
+                            && customerRepo.existsByTransformer_Id(transformer.getId())
+            ) {
+                throw new TransformerLocationLockedException(
+                        "Transformer '"
+                                + transformer.getTransformerId()
+                                + "' cannot be moved because it has connected customers"
+                );
+            }
+
+            if (locationChanged) {
+                Location location = new Location(
+                        requestedX,
+                        requestedY
+                );
+
+                gridRules.validateDistance(
+                        powerSubstation.getLocation(),
+                        location,
+                        GridRules.MAX_SUBSTATION_TO_TRANSFORMER_DISTANCE,
+                        "Power substation to transformer"
+                );
+
+                transformer.setLocation(location);
+            }
         }
 
         return transformer;

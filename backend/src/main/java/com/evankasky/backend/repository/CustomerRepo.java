@@ -13,5 +13,6 @@ public interface CustomerRepo extends JpaRepository<Customer, UUID> {
     boolean existsByAccountNumberAndIdNot(String accountNumber, UUID customerId);
     List<Customer> findAllByTransformer_PowerSubstation_PowerPlant_Company_Id(UUID powerPlantId);
     long countByTransformer_id(UUID transformerId);
+    boolean existsByTransformer_Id(UUID transformerId);
 
 }
