@@ -9,4 +9,5 @@ import java.util.UUID;
 public interface BillingCycleRepo extends JpaRepository<BillingCycle, UUID> {
     boolean existsByCycleNumber(int cycleNumber);
     Optional<BillingCycle> findByCycleNumber(int cycleNumber);
+    Optional<BillingCycle> findTopByOrderByCycleNumberDesc();
 }
