@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Pencil } from 'lucide-react';
 import { z } from 'zod';
@@ -22,23 +22,43 @@ import {
   type UpdateCustomerRequest,
 } from '@/api/customer';
 
-const updateCustomerSchema = z.object({
-  accountNumber: z
-    .string()
-    .trim()
-    .min(1, 'Account number is required')
-    .max(20, 'Account number cannot exceed 20 characters'),
+const updateCustomerSchema = z
+  .object({
+    accountNumber: z
+      .string()
+      .trim()
+      .min(1, 'Account number is required')
+      .max(20, 'Account number cannot exceed 20 characters'),
 
-  name: z
-    .string()
-    .trim()
-    .min(1, 'Customer name is required')
-    .max(120, 'Customer name cannot exceed 120 characters'),
+    name: z
+      .string()
+      .trim()
+      .min(1, 'Customer name is required')
+      .max(120, 'Customer name cannot exceed 120 characters'),
 
-  x: z.number().int('X coordinate must be an integer'),
+    useStandardBillingRate: z.boolean(),
 
-  y: z.number().int('Y coordinate must be an integer'),
-});
+    customBillingRate: z
+      .number()
+      .min(0, 'Custom billing rate cannot be negative')
+      .optional(),
+
+    x: z.number().int('X coordinate must be an integer'),
+
+    y: z.number().int('Y coordinate must be an integer'),
+  })
+  .superRefine((values, context) => {
+    if (
+      !values.useStandardBillingRate &&
+      values.customBillingRate === undefined
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['customBillingRate'],
+        message: 'Enter a custom billing rate or use the company standard rate',
+      });
+    }
+  });
 
 type UpdateCustomerForm = z.infer<typeof updateCustomerSchema>;
 
@@ -58,6 +78,7 @@ export const EditCustomerDialog = ({
 
   const {
     register,
+    control,
     reset,
     handleSubmit,
     formState: { errors, isSubmitting },
@@ -66,10 +87,22 @@ export const EditCustomerDialog = ({
     defaultValues: {
       accountNumber: customer.accountNumber,
       name: customer.name,
+      useStandardBillingRate: customer.customBillingRate == null,
+      customBillingRate:
+        customer.customBillingRate == null
+          ? undefined
+          : Number(customer.customBillingRate),
       x: customer.location.x,
       y: customer.location.y,
     },
   });
+
+  const useStandardBillingRate = Boolean(
+    useWatch({
+      control,
+      name: 'useStandardBillingRate',
+    }),
+  );
 
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen);
@@ -80,6 +113,11 @@ export const EditCustomerDialog = ({
       reset({
         accountNumber: customer.accountNumber,
         name: customer.name,
+        useStandardBillingRate: customer.customBillingRate == null,
+        customBillingRate:
+          customer.customBillingRate == null
+            ? undefined
+            : Number(customer.customBillingRate),
         x: customer.location.x,
         y: customer.location.y,
       });
@@ -92,6 +130,10 @@ export const EditCustomerDialog = ({
     const request: UpdateCustomerRequest = {
       accountNumber: values.accountNumber.trim(),
       name: values.name.trim(),
+      useStandardBillingRate: values.useStandardBillingRate,
+      customBillingRate: values.useStandardBillingRate
+        ? null
+        : values.customBillingRate,
       location: {
         x: values.x,
         y: values.y,
@@ -202,6 +244,82 @@ export const EditCustomerDialog = ({
             {errors.name && (
               <p className='text-sm text-destructive'>{errors.name.message}</p>
             )}
+          </div>
+
+          <div className='space-y-4'>
+            <div>
+              <Label>Billing rate</Label>
+
+              <p className='text-sm text-muted-foreground'>
+                Use the company standard rate or assign a custom rate.
+              </p>
+            </div>
+
+            <label
+              htmlFor={`useStandardBillingRate-${customer.id}`}
+              className='flex cursor-pointer items-start gap-3 rounded-md border p-4'
+            >
+              <input
+                id={`useStandardBillingRate-${customer.id}`}
+                type='checkbox'
+                disabled={isSubmitting}
+                {...register('useStandardBillingRate')}
+              />
+
+              <span>
+                <span className='block font-medium'>
+                  Use company standard rate
+                </span>
+
+                <span className='block text-sm text-muted-foreground'>
+                  Company standard rate: $
+                  {Number(customer.standardBillingRate).toFixed(4)} per kWh
+                </span>
+              </span>
+            </label>
+
+            <div className='space-y-2'>
+              <Label htmlFor={`customBillingRate-${customer.id}`}>
+                Custom billing rate
+              </Label>
+
+              <div className='relative'>
+                <span className='pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground'>
+                  $
+                </span>
+
+                <Input
+                  id={`customBillingRate-${customer.id}`}
+                  type='number'
+                  min='0'
+                  step='0.0001'
+                  className='pl-8'
+                  placeholder='0.1500'
+                  disabled={isSubmitting || useStandardBillingRate}
+                  aria-invalid={Boolean(errors.customBillingRate)}
+                  {...register('customBillingRate', {
+                    setValueAs: (value) =>
+                      value === '' ? undefined : Number(value),
+                  })}
+                />
+              </div>
+
+              {useStandardBillingRate ? (
+                <p className='text-sm text-muted-foreground'>
+                  This customer will follow the company standard rate.
+                </p>
+              ) : (
+                <p className='text-sm text-muted-foreground'>
+                  This rate overrides the company standard rate.
+                </p>
+              )}
+
+              {errors.customBillingRate && (
+                <p className='text-sm text-destructive'>
+                  {errors.customBillingRate.message}
+                </p>
+              )}
+            </div>
           </div>
 
           <div className='space-y-3'>

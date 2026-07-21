@@ -9,6 +9,7 @@ export interface Customer {
   name: string;
   customerType: CustomerType;
   customBillingRate: number | string | null;
+  standardBillingRate: number | string;
   effectiveBillingRate: number | string;
   location: {
     x: number;
@@ -30,6 +31,8 @@ export interface CreateCustomerRequest {
 export interface UpdateCustomerRequest {
   accountNumber: string;
   name: string;
+  useStandardBillingRate?: boolean;
+  customBillingRate?: number | null;
   location: {
     x: number;
     y: number;

@@ -12,5 +12,7 @@ public record CustomerResponse(
         String name,
         CustomerType customerType,
         BigDecimal customBillingRate,
+        BigDecimal standardBillingRate,
+        BigDecimal effectiveBillingRate,
         LocationResponse location
 ) { }

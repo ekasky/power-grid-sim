@@ -155,10 +155,24 @@ public class CustomerService {
         }
 
         // Update custom billing rate
-        if(Boolean.TRUE.equals(request.useStandardBillingRate())) {
+        if (Boolean.TRUE.equals(request.useStandardBillingRate())) {
             customer.setCustomBillingRate(null);
-        } else if(request.customBillingRate() != null) {
-            customer.setCustomBillingRate(request.customBillingRate());
+
+        } else if (request.customBillingRate() != null) {
+            BigDecimal requestedRate = request.customBillingRate();
+
+            BigDecimal standardRate = customer
+                    .getTransformer()
+                    .getPowerSubstation()
+                    .getPowerPlant()
+                    .getCompany()
+                    .getStandardRate();
+
+            if (requestedRate.compareTo(standardRate) == 0) {
+                customer.setCustomBillingRate(null);
+            } else {
+                customer.setCustomBillingRate(requestedRate);
+            }
         }
 
         // Update location

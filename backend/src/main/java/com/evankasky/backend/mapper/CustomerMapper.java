@@ -19,6 +19,8 @@ public class CustomerMapper {
                 customer.getAccountNumber(),
                 customer.getName(),
                 customer.getCustomerType(),
+                customer.getCustomBillingRate(),
+                customer.getPowerCompany().getStandardRate(),
                 customer.getEffectiveBillingRate(),
                 locationResponse
         );
