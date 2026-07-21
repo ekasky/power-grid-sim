@@ -1,0 +1,101 @@
+package com.evankasky.backend.model;
+
+import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
+
+import java.math.BigDecimal;
+import java.util.UUID;
+
+@Entity
+@Table(
+        name = "usage_record",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_usage_record_customer_cycle",
+                columnNames = {"customer_id", "billing_cycle"}
+        )
+)
+public class UsageRecord {
+
+    @Id
+    @GeneratedValue
+    @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
+    @Column(nullable = false, updatable = false)
+    private UUID id;
+
+    @Column(name = "kwh_used", nullable = false, precision = 12, scale = 4)
+    private BigDecimal kwhUsed;
+
+    @Column(name = "billing_cycle", nullable = false)
+    private int billingCycle;
+
+    @Column(name = "billing_rate", nullable = false, precision = 12, scale = 4)
+    private BigDecimal billingRate;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
+
+    /* *****************************************************************************************************************
+     *                                                  Constructors
+     ***************************************************************************************************************** */
+
+    protected UsageRecord() { }
+
+    public UsageRecord(
+            int billingCycle,
+            BigDecimal billingRate,
+            BigDecimal kwhUsed,
+            Customer customer
+    ) {
+        this.billingCycle = billingCycle;
+        this.billingRate = billingRate;
+        this.kwhUsed = kwhUsed;
+        this.customer = customer;
+    }
+
+    /* *****************************************************************************************************************
+     *                                            Usage Record Methods
+     ***************************************************************************************************************** */
+
+
+
+    /* *****************************************************************************************************************
+     *                                               Getters and Setters
+     * *****************************************************************************************************************/
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setBillingCycle(int billingCycle) {
+        this.billingCycle = billingCycle;
+    }
+
+    public int getBillingCycle() {
+        return billingCycle;
+    }
+
+    public void setBillingRate(BigDecimal billingRate) {
+        this.billingRate = billingRate;
+    }
+
+    public BigDecimal getBillingRate() {
+        return billingRate;
+    }
+
+    public void setKwhUsed(BigDecimal kwhUsed) {
+        this.kwhUsed = kwhUsed;
+    }
+
+    public BigDecimal getKwhUsed() {
+        return kwhUsed;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+}

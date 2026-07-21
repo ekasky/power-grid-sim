@@ -3,6 +3,7 @@ package com.evankasky.backend.model;
 import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
@@ -10,7 +11,7 @@ import java.util.UUID;
         name = "customers",
         uniqueConstraints = @UniqueConstraint(
                 name = "uk_customer_company_account_number",
-                columnNames = "accountNumber"
+                columnNames = "account_number"
         )
 )
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -33,6 +34,9 @@ public abstract class Customer {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "billing_rate", nullable = false, precision = 19, scale = 4)
+    private BigDecimal billingRate;
+
     @Embedded
     private Location location;
 
@@ -49,10 +53,12 @@ public abstract class Customer {
     protected Customer(
             String accountNumber,
             String name,
+            BigDecimal billingRate,
             Location location
     ) {
         this.accountNumber = accountNumber;
         this.name = name;
+        this.billingRate = billingRate;
         this.location = location;
     }
 
@@ -102,6 +108,14 @@ public abstract class Customer {
 
     public String getName() {
         return name;
+    }
+
+    public void setBillingRate(BigDecimal billingRate) {
+        this.billingRate = billingRate;
+    }
+
+    public BigDecimal getBillingRate() {
+        return billingRate;
     }
 
     public void setLocation(Location location) {
