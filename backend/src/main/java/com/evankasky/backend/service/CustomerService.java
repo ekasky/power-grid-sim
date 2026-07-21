@@ -22,14 +22,16 @@ public class CustomerService {
 
     private final TransformerRepo transformerRepo;
     private final CustomerRepo customerRepo;
+    private final GridRules gridRules;
 
     /* *****************************************************************************************************************
      *                                              Constructors
      ***************************************************************************************************************** */
 
-    public CustomerService(TransformerRepo transformerRepo, CustomerRepo customerRepo) {
+    public CustomerService(TransformerRepo transformerRepo, CustomerRepo customerRepo, GridRules gridRules) {
         this.transformerRepo = transformerRepo;
         this.customerRepo = customerRepo;
+        this.gridRules = gridRules;
     }
 
     /* *****************************************************************************************************************
@@ -73,6 +75,15 @@ public class CustomerService {
                 )
         );
 
+        Location location = new Location(request.location().x(), request.location().y());
+
+        gridRules.validateDistance(
+                transformer.getLocation(),
+                location,
+                GridRules.MAX_TRANSFORMER_TO_CUSTOMER_DISTANCE,
+                "Transformer to customer"
+        );
+
         long customerCount = customerRepo.countByTransformer_id(transformerId);
 
         if(customerCount >= GridRules.MAX_CUSTOMERS_PER_TRANSFORMER) {
@@ -81,8 +92,6 @@ public class CustomerService {
                             "of 5 customers"
             );
         }
-
-        Location location = new Location(request.location().x(), request.location().y());
 
         Customer customer = switch (request.customerType()) {
             case RESIDENTIAL -> new ResidentialCustomer(accountNumber, name, location);
@@ -124,9 +133,31 @@ public class CustomerService {
             customer.setName(request.name().trim());
         }
 
-        if(request.location() != null) {
-            Location location = new Location(request.location().x(), request.location().y());
-            customer.setLocation(location);
+        if (request.location() != null) {
+            Location currentLocation = customer.getLocation();
+
+            int requestedX = request.location().x();
+            int requestedY = request.location().y();
+
+            boolean locationChanged =
+                    currentLocation.getX() != requestedX
+                            || currentLocation.getY() != requestedY;
+
+            if (locationChanged) {
+                Location requestedLocation = new Location(
+                        requestedX,
+                        requestedY
+                );
+
+                gridRules.validateDistance(
+                        customer.getTransformer().getLocation(),
+                        requestedLocation,
+                        GridRules.MAX_TRANSFORMER_TO_CUSTOMER_DISTANCE,
+                        "Transformer to customer"
+                );
+
+                customer.setLocation(requestedLocation);
+            }
         }
 
         return customer;
