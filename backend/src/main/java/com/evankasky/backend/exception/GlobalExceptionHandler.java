@@ -6,6 +6,7 @@ import com.evankasky.backend.exception.customer.CustomerNotFoundException;
 import com.evankasky.backend.exception.powercompany.PowerCompanyExistsException;
 import com.evankasky.backend.exception.powercompany.PowerCompanyNotFoundException;
 import com.evankasky.backend.exception.powerplant.PowerPlantExistsException;
+import com.evankasky.backend.exception.powerplant.PowerPlantLocationLockedException;
 import com.evankasky.backend.exception.powerplant.PowerPlantNotFoundException;
 import com.evankasky.backend.exception.powersubstation.PowerSubstationExistsException;
 import com.evankasky.backend.exception.powersubstation.PowerSubstationNotFoundException;
@@ -75,6 +76,19 @@ public class GlobalExceptionHandler {
     ) {
         return buildResponse(
                 HttpStatus.NOT_FOUND,
+                exception.getMessage(),
+                request.getRequestURI(),
+                Map.of()
+        );
+    }
+
+    @ExceptionHandler(PowerPlantLocationLockedException.class)
+    public ResponseEntity<PowerGridSimulationExceptionApiResponse> handlePowerPlantLocationLockedException(
+            PowerPlantLocationLockedException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.FORBIDDEN,
                 exception.getMessage(),
                 request.getRequestURI(),
                 Map.of()

@@ -14,5 +14,6 @@ public interface PowerSubstationRepo extends JpaRepository<PowerSubstation, UUID
     List<PowerSubstation> findAllByPowerPlant_Id(UUID powerPlantId);
     List<PowerSubstation> findAllByPowerPlant_Company_Id(UUID companyId);
     long countByPowerPlant_Id(UUID powerPlantId);
+    boolean existsByPowerPlant_Id(UUID powerPlantId);
 
 }

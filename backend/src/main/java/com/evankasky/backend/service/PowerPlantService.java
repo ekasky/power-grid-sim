@@ -4,12 +4,15 @@ import com.evankasky.backend.dto.powerplant.CreatePowerPlantRequest;
 import com.evankasky.backend.dto.powerplant.UpdatePowerPlantRequest;
 import com.evankasky.backend.exception.powercompany.PowerCompanyNotFoundException;
 import com.evankasky.backend.exception.powerplant.PowerPlantExistsException;
+import com.evankasky.backend.exception.powerplant.PowerPlantLocationLockedException;
 import com.evankasky.backend.exception.powerplant.PowerPlantNotFoundException;
+import com.evankasky.backend.exception.powersubstation.SubstationLocationLockedException;
 import com.evankasky.backend.model.Location;
 import com.evankasky.backend.model.PowerCompany;
 import com.evankasky.backend.model.PowerPlant;
 import com.evankasky.backend.repository.PowerCompanyRepo;
 import com.evankasky.backend.repository.PowerPlantRepo;
+import com.evankasky.backend.repository.PowerSubstationRepo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,14 +24,16 @@ public class PowerPlantService {
 
     private final PowerCompanyRepo powerCompanyRepo;
     private final PowerPlantRepo powerPlantRepo;
+    private final PowerSubstationRepo powerSubstationRepo;
 
     /* *****************************************************************************************************************
      *                                              Constructors
      ***************************************************************************************************************** */
 
-    public PowerPlantService(PowerCompanyRepo powerCompanyRepo, PowerPlantRepo powerPlantRepo) {
+    public PowerPlantService(PowerCompanyRepo powerCompanyRepo, PowerPlantRepo powerPlantRepo, PowerSubstationRepo powerSubstationRepo) {
         this.powerCompanyRepo = powerCompanyRepo;
         this.powerPlantRepo = powerPlantRepo;
+        this.powerSubstationRepo = powerSubstationRepo;
     }
 
     /* *****************************************************************************************************************
@@ -126,8 +131,22 @@ public class PowerPlantService {
 
         if(request.location() != null) {
 
-            Location location = new Location(request.location().x(), request.location().y());
-            powerPlant.setLocation(location);
+            Location currentLocation = powerPlant.getLocation();
+
+            int requestX = request.location().x();
+            int requestY = request.location().y();
+
+            boolean locationChanged = currentLocation.getX() != requestX || currentLocation.getY() != requestY;
+
+            if(locationChanged && powerSubstationRepo.existsByPowerPlant_Id(powerPlant.getId())) {
+                throw new PowerPlantLocationLockedException(
+                        "Power plant '" + powerPlant.getPlantId() + "' cannot be moved because it has connected substations"
+                );
+            }
+
+            if(locationChanged) {
+                powerPlant.setLocation(new Location(requestX, requestY));
+            }
 
         }
 
