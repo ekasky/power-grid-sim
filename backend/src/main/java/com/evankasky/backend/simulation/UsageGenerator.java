@@ -25,7 +25,7 @@ public class UsageGenerator {
         double generatedUsage = switch (customer.getCustomerType()) {
             case RESIDENTIAL -> generateBetween(MIN_RESIDENTIAL_KWH, MAX_RESIDENTIAL_KWH);
             case COMMERCIAL -> generateBetween(MIN_COMMERCIAL_KWH, MAX_COMMERCIAL_KWH);
-        }
+        };
 
         return BigDecimal.valueOf(generatedUsage).setScale(4, RoundingMode.HALF_UP);
 
