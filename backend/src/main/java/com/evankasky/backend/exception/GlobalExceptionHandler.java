@@ -14,6 +14,7 @@ import com.evankasky.backend.exception.powersubstation.SubstationLocationLockedE
 import com.evankasky.backend.exception.transformer.TransformerExistsException;
 import com.evankasky.backend.exception.transformer.TransformerLocationLockedException;
 import com.evankasky.backend.exception.transformer.TransformerNotFoundException;
+import com.evankasky.backend.exception.usagerecord.UsageRecordExistsException;
 import com.evankasky.backend.exception.validation.GridCapacityExceededException;
 import com.evankasky.backend.exception.validation.InvalidGridConnectionException;
 import jakarta.servlet.http.HttpServlet;
@@ -221,6 +222,19 @@ public class GlobalExceptionHandler {
     ) {
         return buildResponse(
                 HttpStatus.BAD_REQUEST,
+                exception.getMessage(),
+                request.getRequestURI(),
+                Map.of()
+        );
+    }
+
+    @ExceptionHandler(UsageRecordExistsException.class)
+    public ResponseEntity<PowerGridSimulationExceptionApiResponse> handleUsageRecordExistsException(
+            UsageRecordExistsException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.CONFLICT,
                 exception.getMessage(),
                 request.getRequestURI(),
                 Map.of()
