@@ -3,6 +3,8 @@ package com.evankasky.backend.service;
 import com.evankasky.backend.exception.PowerGridSimulationLogicalException;
 import com.evankasky.backend.model.BillingCycle;
 import com.evankasky.backend.model.Customer;
+import com.evankasky.backend.model.PowerCompany;
+import com.evankasky.backend.model.UsageRecord;
 import com.evankasky.backend.repository.BillingCycleRepo;
 import com.evankasky.backend.repository.CustomerRepo;
 import com.evankasky.backend.simulation.UsageGenerator;
@@ -33,7 +35,7 @@ public class BillingCycleService {
         this.billingCycleRepo = billingCycleRepo;
         this.customerRepo = customerRepo;
         this.usageRecordService = usageRecordService;
-        this.usageRecordService = usageGenerator;
+        this.usageGenerator = usageGenerator;
     }
 
     /* *****************************************************************************************************************
@@ -56,15 +58,25 @@ public class BillingCycleService {
         for(Customer customer : customers) {
 
             // Generate the amount of power consumed by a customer
+            BigDecimal kwhUsed = usageGenerator.generateUsage(customer);
 
             // Create the usage record
+            UsageRecord usageRecord = usageRecordService.createUsageRecord(customer, billingCycle, kwhUsed);
 
             // Calculate the cost for the customer
+            BigDecimal amountCharged = usageRecord.getAmountCharged();
+
+            // Add revenue to power company
+            PowerCompany powerCompany = customer.getPowerCompany();
+            powerCompany.addRevenue(amountCharged);
+
         }
 
         // Calculate cost for the company
+        calculateCompanyCosts(billingCycle);
 
         // Mark cycle as done
+        billingCycle.complete();
 
         return billingCycle;
 
@@ -73,6 +85,10 @@ public class BillingCycleService {
     /* *****************************************************************************************************************
      *                                              Helper Methods
      ***************************************************************************************************************** */
+
+    private void calculateCompanyCosts(BillingCycle billingCycle) {
+        // TODO: write method
+    }
 
     private int getNextCycleNumber() {
         return billingCycleRepo

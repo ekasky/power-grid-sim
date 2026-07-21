@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -53,6 +54,17 @@ public class UsageRecord {
         this.billingRate = billingRate;
         this.kwhUsed = kwhUsed;
         this.customer = customer;
+    }
+
+    /* *****************************************************************************************************************
+     *                                            Usage Record Transients
+     ***************************************************************************************************************** */
+
+    @Transient
+    public BigDecimal getAmountCharged() {
+        return kwhUsed
+                .multiply(billingRate)
+                .setScale(2, RoundingMode.HALF_UP);
     }
 
     /* *****************************************************************************************************************

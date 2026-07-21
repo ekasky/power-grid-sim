@@ -1,5 +1,6 @@
 package com.evankasky.backend.model;
 
+import com.evankasky.backend.exception.PowerGridSimulationLogicalException;
 import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -64,6 +65,20 @@ public class PowerCompany {
     public void deletePowerPlant(PowerPlant powerPlant) {
         powerPlants.remove(powerPlant);
         powerPlant.setCompany(null);
+    }
+
+    public void addRevenue(BigDecimal amount) {
+
+        if(amount == null) {
+            throw new PowerGridSimulationLogicalException("Revenue amount cannot be null");
+        }
+
+        if(amount.signum() < 0) {
+            throw new PowerGridSimulationLogicalException("Revenue amount cannot be negative");
+        }
+
+        totalRevenue = totalRevenue.add(amount);
+
     }
 
     /* *****************************************************************************************************************
