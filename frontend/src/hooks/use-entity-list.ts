@@ -132,7 +132,7 @@ export const useEntityList = <T extends Entity>({
 
         return {
           ...curr,
-          items: curr.items.map((i) => (i.id === i.id ? item : i)),
+          items: curr.items.map((i) => (item.id === i.id ? item : i)),
         };
       });
     },
