@@ -6,6 +6,7 @@ import com.evankasky.backend.exception.powercompany.PowerCompanyNotFoundExceptio
 import com.evankasky.backend.exception.powerplant.PowerPlantNotFoundException;
 import com.evankasky.backend.exception.powersubstation.PowerSubstationExistsException;
 import com.evankasky.backend.exception.powersubstation.PowerSubstationNotFoundException;
+import com.evankasky.backend.exception.powersubstation.SubstationLocationLockedException;
 import com.evankasky.backend.exception.validation.GridCapacityExceededException;
 import com.evankasky.backend.model.Location;
 import com.evankasky.backend.model.PowerPlant;
@@ -13,6 +14,7 @@ import com.evankasky.backend.model.PowerSubstation;
 import com.evankasky.backend.repository.PowerCompanyRepo;
 import com.evankasky.backend.repository.PowerPlantRepo;
 import com.evankasky.backend.repository.PowerSubstationRepo;
+import com.evankasky.backend.repository.TransformerRepo;
 import com.evankasky.backend.validation.GridRules;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,8 @@ public class PowerSubstationService {
     private final PowerCompanyRepo powerCompanyRepo;
     private final PowerPlantRepo powerPlantRepo;
     private final PowerSubstationRepo powerSubstationRepo;
+    private final TransformerRepo transformerRepo;
+    private final GridRules gridRules;
 
     /* *****************************************************************************************************************
      *                                              Constructors
@@ -34,11 +38,15 @@ public class PowerSubstationService {
     public PowerSubstationService(
             PowerCompanyRepo powerCompanyRepo,
             PowerPlantRepo powerPlantRepo,
-            PowerSubstationRepo powerSubstationRepo
+            PowerSubstationRepo powerSubstationRepo,
+            TransformerRepo transformerRepo,
+            GridRules gridRules
     ) {
         this.powerCompanyRepo = powerCompanyRepo;
         this.powerPlantRepo = powerPlantRepo;
         this.powerSubstationRepo = powerSubstationRepo;
+        this.transformerRepo = transformerRepo;
+        this.gridRules = gridRules;
     }
 
     /* *****************************************************************************************************************
@@ -100,6 +108,18 @@ public class PowerSubstationService {
             );
         }
 
+        Location location = new Location(
+                request.location().x(),
+                request.location().y()
+        );
+
+        gridRules.validateDistance(
+                powerPlant.getLocation(),
+                location,
+                GridRules.MAX_PLANT_TO_SUBSTATION_DISTANCE,
+                "Power plant to substation"
+        );
+
         String substationId = request.substationId().trim();
 
         if(powerSubstationRepo.existsByPowerPlant_IdAndSubstationId(powerPlantId, substationId)) {
@@ -108,11 +128,6 @@ public class PowerSubstationService {
                             powerPlant.getPlantId() + "'"
             );
         }
-
-        Location location = new Location(
-                request.location().x(),
-                request.location().y()
-        );
 
         PowerSubstation powerSubstation = new PowerSubstation(
                 substationId,
@@ -136,6 +151,13 @@ public class PowerSubstationService {
                 .orElseThrow(() -> new PowerSubstationNotFoundException(
                         "Power substation '" + powerSubstationId + "' not found"
                 )
+        );
+
+        gridRules.validateDistance(
+                powerSubstation.getPowerPlant().getLocation(),
+                powerSubstation.getLocation(),
+                GridRules.MAX_PLANT_TO_SUBSTATION_DISTANCE,
+                "Power plant to substation"
         );
 
         UUID powerPlantId = powerSubstation.getPowerPlant().getId();
@@ -163,11 +185,35 @@ public class PowerSubstationService {
             powerSubstation.setRecurringMaintenanceCost(request.recurringMaintenanceCost());
         }
 
-        if(request.location() != null) {
+        if (request.location() != null) {
 
-            Location location = new Location(request.location().x(), request.location().y());
-            powerSubstation.setLocation(location);
+            Location currentLocation = powerSubstation.getLocation();
 
+            int requestedX = request.location().x();
+            int requestedY = request.location().y();
+
+            boolean locationChanged =
+                    currentLocation.getX() != requestedX
+                            || currentLocation.getY() != requestedY;
+
+            if (
+                    locationChanged
+                            && transformerRepo.existsByPowerSubstation_Id(
+                            powerSubstation.getId()
+                    )
+            ) {
+                throw new SubstationLocationLockedException(
+                        "Power substation '"
+                                + powerSubstation.getSubstationId()
+                                + "' cannot be moved because it has connected transformers"
+                );
+            }
+
+            if (locationChanged) {
+                powerSubstation.setLocation(
+                        new Location(requestedX, requestedY)
+                );
+            }
         }
 
         return powerSubstation;

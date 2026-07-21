@@ -9,6 +9,7 @@ import com.evankasky.backend.exception.powerplant.PowerPlantExistsException;
 import com.evankasky.backend.exception.powerplant.PowerPlantNotFoundException;
 import com.evankasky.backend.exception.powersubstation.PowerSubstationExistsException;
 import com.evankasky.backend.exception.powersubstation.PowerSubstationNotFoundException;
+import com.evankasky.backend.exception.powersubstation.SubstationLocationLockedException;
 import com.evankasky.backend.exception.transformer.TransformerExistsException;
 import com.evankasky.backend.exception.transformer.TransformerNotFoundException;
 import com.evankasky.backend.exception.validation.GridCapacityExceededException;
@@ -100,6 +101,19 @@ public class GlobalExceptionHandler {
     ) {
         return buildResponse(
                 HttpStatus.NOT_FOUND,
+                exception.getMessage(),
+                request.getRequestURI(),
+                Map.of()
+        );
+    }
+
+    @ExceptionHandler(SubstationLocationLockedException.class)
+    public ResponseEntity<PowerGridSimulationExceptionApiResponse> handleSubstationLocationLockedException(
+            SubstationLocationLockedException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.FORBIDDEN,
                 exception.getMessage(),
                 request.getRequestURI(),
                 Map.of()
