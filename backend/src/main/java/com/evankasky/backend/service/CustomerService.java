@@ -6,9 +6,11 @@ import com.evankasky.backend.dto.customer.UpdateCustomerRequest;
 import com.evankasky.backend.exception.customer.CustomerExistsException;
 import com.evankasky.backend.exception.customer.CustomerNotFoundException;
 import com.evankasky.backend.exception.transformer.TransformerNotFoundException;
+import com.evankasky.backend.exception.validation.GridCapacityExceededException;
 import com.evankasky.backend.model.*;
 import com.evankasky.backend.repository.CustomerRepo;
 import com.evankasky.backend.repository.TransformerRepo;
+import com.evankasky.backend.validation.GridRules;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,6 +72,15 @@ public class CustomerService {
                         "Transformer '" + transformerId + "' not found"
                 )
         );
+
+        long customerCount = customerRepo.countByTransformer_id(transformerId);
+
+        if(customerCount >= GridRules.MAX_CUSTOMERS_PER_TRANSFORMER) {
+            throw new GridCapacityExceededException(
+                    "Transformer '" + transformer.getTransformerId() + "' already supports the maximum " +
+                            "of 5 customers"
+            );
+        }
 
         Location location = new Location(request.location().x(), request.location().y());
 
